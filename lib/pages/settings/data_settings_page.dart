@@ -100,26 +100,13 @@ class DataSettingsPage extends StatelessWidget {
 
   Future<void> _clearWebData(BuildContext context) async {
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('清除网页数据'),
-          content: const Text('会清掉教务系统的登录状态与页面缓存，下次导入需要重新登录。'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('清除'),
-            ),
-          ],
-        );
-      },
+    final bool confirmed = await _confirm(
+      context,
+      title: '清除网页数据',
+      content: '会清掉教务系统的登录状态与页面缓存，下次导入需要重新登录。',
+      confirmLabel: '清除',
     );
-    if (confirmed != true) {
+    if (!confirmed) {
       return;
     }
     if (WebViewPlatform.instance == null) {
@@ -140,29 +127,41 @@ class DataSettingsPage extends StatelessWidget {
   void _toast(ScaffoldMessengerState messenger, String message) {
     messenger.showSnackBar(SnackBar(content: Text(message)));
   }
+  static Future<bool> _confirm(
+    BuildContext context, {
+    required String title,
+    required String content,
+    required String confirmLabel,
+  }) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(confirmLabel),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
 
   Future<void> _clearTimetable(BuildContext context, AppState state) async {
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('清空课表'),
-          content: Text('将删除全部 ${state.sessions.length} 条上课安排。'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('清空'),
-            ),
-          ],
-        );
-      },
+    final bool confirmed = await _confirm(
+      context,
+      title: '清空课表',
+      content: '将删除全部 ${state.sessions.length} 条上课安排。',
+      confirmLabel: '清空',
     );
-    if (confirmed != true) {
+    if (!confirmed) {
       return;
     }
     await state.clearSessions();

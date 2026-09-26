@@ -317,12 +317,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
     if (result == null) {
       return const <CourseSession>[];
     }
-    if (!result.isOk) {
-      if (result.message.isNotEmpty) {
-        _attemptErrors.add(result.message);
-      }
-      return const <CourseSession>[];
-    }
     if (result.schoolYear.isNotEmpty || result.term.isNotEmpty) {
       _scope = '${result.schoolYear} 学年${_termLabel(result.term)}';
     }
@@ -341,12 +335,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
       (String token) => JwxtWebScripts.scrapeDocument(token: token),
     );
     if (result == null) {
-      return const <CourseSession>[];
-    }
-    if (!result.isOk) {
-      if (result.message.isNotEmpty) {
-        _attemptErrors.add(result.message);
-      }
       return const <CourseSession>[];
     }
     if (result.warning.isNotEmpty) {
@@ -380,7 +368,16 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
         _attemptErrors.add('执行页面脚本失败：$error');
         return null;
       }
-      return await completer.future.timeout(timeout);
+      final JwxtBridgeResult result = await completer.future.timeout(timeout);
+      // 脚本自己报了失败：记下原因，并按「没拿到结果」返回，
+      // 这样两个调用方不用各写一遍这段判断。
+      if (!result.isOk) {
+        if (result.message.isNotEmpty) {
+          _attemptErrors.add(result.message);
+        }
+        return null;
+      }
+      return result;
     } on TimeoutException {
       _attemptErrors.add('读取超时，请确认页面已完全加载并处于登录状态');
       return null;

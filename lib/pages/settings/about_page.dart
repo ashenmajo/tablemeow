@@ -19,18 +19,11 @@ class AboutPage extends StatelessWidget {
             title: 'TableMeow',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '版本 1.0.0',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
+              children: <Widget>[
+                Text('版本 1.0.0', style: theme.textTheme.bodyMedium),
                 Text(
                   'Flutter Material Designed 3',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
+                  style: theme.textTheme.bodyMedium,
                 ),
               ],
             ),
