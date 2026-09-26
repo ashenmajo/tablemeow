@@ -1,3 +1,8 @@
+///period_setting_page.dart
+///该文件是节次时间设置页
+///提供了自动分配时间，测试的时候发现有些课间、课长没有统一的导致后面的时间分配出错，所以提供了手动修改时间
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../models/period_time.dart';
@@ -8,7 +13,6 @@ import '../../utils/date_format.dart';
 import '../../widgets/page_scaffold.dart';
 import '../../widgets/section_card.dart';
 
-/// 节次时间：可以逐节手改，也可以用上面的「自动调整」一次排好。
 class PeriodSettingsPage extends StatefulWidget {
   const PeriodSettingsPage({super.key});
 
@@ -35,23 +39,24 @@ class _PeriodSettingsPageState extends State<PeriodSettingsPage> {
       return;
     }
     _initialised = true;
-    // 默认值取自当前作息：各段的第一个开始时间、第一节时长与课间。
+
     final List<PeriodTime> periods = AppScope.of(context).semester.periods;
     _morning = _firstStartOf(periods, PeriodSession.morning, 8 * 60);
     _afternoon = _firstStartOf(periods, PeriodSession.afternoon, 14 * 60);
     _evening = _firstStartOf(periods, PeriodSession.evening, 19 * 60);
     if (periods.isNotEmpty) {
       final PeriodTime first = periods.first;
-      _lesson = (PeriodTime.minuteOf(first.end) -
-              PeriodTime.minuteOf(first.start))
-          .clamp(_minLesson, _maxLesson)
-          .toDouble();
+      _lesson =
+          (PeriodTime.minuteOf(first.end) - PeriodTime.minuteOf(first.start))
+              .clamp(_minLesson, _maxLesson)
+              .toDouble();
     }
     if (periods.length > 1) {
-      _rest = (PeriodTime.minuteOf(periods[1].start) -
-              PeriodTime.minuteOf(periods.first.end))
-          .clamp(0, _maxBreak)
-          .toDouble();
+      _rest =
+          (PeriodTime.minuteOf(periods[1].start) -
+                  PeriodTime.minuteOf(periods.first.end))
+              .clamp(0, _maxBreak)
+              .toDouble();
     }
   }
 
@@ -237,7 +242,6 @@ class _PeriodSettingsPageState extends State<PeriodSettingsPage> {
       '${twoDigits(time.hour)}:${twoDigits(time.minute)}';
 }
 
-/// 一行时间设置，点开系统时间选择器。
 class _TimeRow extends StatelessWidget {
   const _TimeRow({
     required this.label,
@@ -276,7 +280,6 @@ class _TimeRow extends StatelessWidget {
   }
 }
 
-/// 一行「标题 + 当前值 + 控件」。
 class _SliderRow extends StatelessWidget {
   const _SliderRow({
     required this.label,

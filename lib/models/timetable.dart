@@ -5,7 +5,7 @@ import 'period_time.dart';
 import 'semester.dart';
 import 'timetable_style.dart';
 
-/// 一份完整的课表：学期设置 + 外观设置 + 全部上课安排。
+//一份完整的课表：学期设置 + 外观设置 + 全部上课安排。
 @immutable
 class Timetable {
   const Timetable({
@@ -14,24 +14,25 @@ class Timetable {
     this.style = TimetableStyle.defaults,
   });
 
-  /// 空课表：以 [today] 所在周为第 1 周。
+  // 空课表：以 [today] 所在周为第 1 周。
   factory Timetable.empty({DateTime? today}) =>
       Timetable(semester: Semester.defaults(today: today));
 
   final Semester semester;
   final List<CourseSession> sessions;
 
-  /// 课表外观（格子尺寸、字号、网格线），长按课表可改。
+  //课表外观（格子尺寸、字号、网格线），长按课表可改。
   final TimetableStyle style;
 
   bool get isEmpty => sessions.isEmpty;
 
   bool get isNotEmpty => sessions.isNotEmpty;
 
-  /// 第 [week] 周课表需要显示到第几节。
-  ///
-  /// 取该周最后一节课的结束节次，并用 [minPeriods] 兜底，
-  /// 避免只上两节课时课表被压得过短。
+  /*
+  第week周课表需要显示到第几节。
+  取该周最后一节课的结束节次，并用minPeriods兜底，
+  避免只上两节课时课表被压得过短。
+*/
   int visiblePeriodCount(int week, {int minPeriods = 8}) {
     int last = 0;
     for (final CourseSession session in sessionsOfWeek(week)) {
@@ -43,15 +44,15 @@ class Timetable {
     return target.clamp(1, semester.periods.length);
   }
 
-  /// 课程门数（按名称去重）。
-  int get courseCount => courseNames.length;
-
-  /// 全部课程名（去重、按名称排序），设置页列自定义项时用。
+  /// 全部课程名（去重、按名称排序
   List<String> get courseNames =>
       sessions.map((CourseSession session) => session.name).toSet().toList()
         ..sort();
 
-  /// 第 [week] 周星期 [weekday] 的课程，按节次排序。
+  /// 课程门数
+  int get courseCount => courseNames.length;
+
+  /// 第 [week] 周星期 [weekday] 的课程，按节次排序
   List<CourseSession> sessionsAt({required int week, required int weekday}) {
     return sessions
         .where(

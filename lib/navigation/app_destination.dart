@@ -1,9 +1,12 @@
+/// app_destination.dart
+/// 该文件是底部导航栏的数据配置文件
+/// by ashenmajo
+library;
+
 import 'package:flutter/material.dart';
 
-/// 底部导航的页面标识。
 enum AppTab { timetable, today, settings }
 
-/// 底部导航的一个入口。
 @immutable
 class AppDestination {
   const AppDestination({
@@ -14,11 +17,7 @@ class AppDestination {
   });
 
   final AppTab tab;
-
-  /// 导航栏文字。
   final String label;
-
-  /// 未选中与选中时使用的图标。
   final IconData icon;
   final IconData selectedIcon;
 }
@@ -44,6 +43,5 @@ const List<AppDestination> appDestinations = <AppDestination>[
   ),
 ];
 
-/// [tab] 在底部导航中的下标。
 int indexOfTab(AppTab tab) =>
     appDestinations.indexWhere((AppDestination d) => d.tab == tab);

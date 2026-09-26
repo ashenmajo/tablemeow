@@ -20,20 +20,13 @@ abstract final class JwxtWebScripts {
   /// 读取课表：优先请求教务系统接口。
   ///
   /// 登录态来自 WebView 自身的 Cookie（含 VPN / SSO 跳转后的会话），
-  /// 因此这里只需要带上当前页面选中的学年学期；
-  /// 页面上取不到时回退到 [fallbackSchoolYear] 与 [fallbackTerm]。
+  /// 学年学期直接取当前页面上选中的那一组；页面上取不到时脚本会报错返回。
   ///
   /// [token] 会原样回传，用来区分不同次请求的回包。
-  static String fetchTimetable({
-    String fallbackSchoolYear = '',
-    String fallbackTerm = '',
-    String token = '',
-  }) {
+  static String fetchTimetable({String token = ''}) {
     return _fetchTimetableTemplate
         .replaceAll('__CHANNEL__', bridgeChannel)
-        .replaceAll('__TOKEN__', jsonEncode(token))
-        .replaceAll('__XNM__', jsonEncode(fallbackSchoolYear))
-        .replaceAll('__XQM__', jsonEncode(fallbackTerm));
+        .replaceAll('__TOKEN__', jsonEncode(token));
   }
 
   /// 抓取当前页面已经渲染出来的课表表格（接口读不到时的兜底）。
@@ -81,8 +74,8 @@ abstract final class JwxtWebScripts {
       }
       return '';
     };
-    var xnm = pick(['#xnm', 'select[name="xnm"]', '#xnmBox']) || __XNM__;
-    var xqm = pick(['#xqm', 'select[name="xqm"]', '#xqmBox']) || __XQM__;
+    var xnm = pick(['#xnm', 'select[name="xnm"]', '#xnmBox']);
+    var xqm = pick(['#xqm', 'select[name="xqm"]', '#xqmBox']);
     if (!xnm || !xqm) {
       post({status: 'error', message: '没有读取到学年学期，请先打开课表查询页面（正方「学生课表查询」/ 强智「学期理论课表」）'});
       return;

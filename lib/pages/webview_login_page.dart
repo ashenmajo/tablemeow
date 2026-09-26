@@ -1,3 +1,7 @@
+///webview_login_page.dart
+///该文件是导入课表页
+library;
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -9,26 +13,14 @@ import '../data/jwxt/jwxt_import_result.dart';
 import '../data/jwxt/jwxt_web_scripts.dart';
 import '../models/course_session.dart';
 
-/// 显式登录页：把学校真实的登录页面放进 WebView，由用户自己完成登录。
-///
-/// 这样 VPN 跳转、统一身份认证、验证码等都不需要单独适配；
-/// 登录完成后借用 WebView 里已有的会话去读取课表，
-/// 读取成功的课程列表通过 [Navigator.pop] 返回给调用方。
 class WebViewLoginPage extends StatefulWidget {
   const WebViewLoginPage({
     super.key,
     required this.initialUrl,
-    this.schoolYear = '',
-    this.term = '3',
     this.totalWeeks = 20,
   });
 
-  /// 首次打开的地址，可以是 VPN 地址，也可以是教务系统地址。
   final String initialUrl;
-
-  /// 兜底学年与学期：页面上读不到选项时使用。
-  final String schoolYear;
-  final String term;
 
   final int totalWeeks;
 
@@ -39,9 +31,8 @@ class WebViewLoginPage extends StatefulWidget {
 class _WebViewLoginPageState extends State<WebViewLoginPage> {
   WebViewController? _controller;
 
-  JwxtCourseParser get _parser => JwxtCourseParser(
-    totalWeeks: widget.totalWeeks,
-  );
+  JwxtCourseParser get _parser =>
+      JwxtCourseParser(totalWeeks: widget.totalWeeks);
 
   Completer<JwxtBridgeResult>? _pending;
 
@@ -71,7 +62,8 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
     super.initState();
     _title = widget.initialUrl;
     if (_supported) {
-      _controller = _buildController()..loadRequest(Uri.parse(widget.initialUrl));
+      _controller = _buildController()
+        ..loadRequest(Uri.parse(widget.initialUrl));
     }
   }
 
@@ -125,7 +117,9 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
   }
 
   void _onBridgeMessage(JavaScriptMessage message) {
-    final JwxtBridgeResult? result = JwxtBridgeResult.tryDecode(message.message);
+    final JwxtBridgeResult? result = JwxtBridgeResult.tryDecode(
+      message.message,
+    );
     final Completer<JwxtBridgeResult>? pending = _pending;
     if (result == null || pending == null || pending.isCompleted) {
       return;
@@ -274,9 +268,8 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
       if (!mounted) {
         return;
       }
-      Navigator.of(context).pop(
-        JwxtImportResult(sessions: sessions, warning: _warning),
-      );
+      Navigator.of(context)
+          .pop(JwxtImportResult(sessions: sessions, warning: _warning));
     } finally {
       if (mounted) {
         setState(() {
@@ -308,11 +301,7 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
 
   Future<List<CourseSession>> _fetchFromApi() async {
     final JwxtBridgeResult? result = await _runScript(
-      (String token) => JwxtWebScripts.fetchTimetable(
-        fallbackSchoolYear: widget.schoolYear,
-        fallbackTerm: widget.term,
-        token: token,
-      ),
+      (String token) => JwxtWebScripts.fetchTimetable(token: token),
     );
     if (result == null) {
       return const <CourseSession>[];
@@ -343,10 +332,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
     return _parser.parseScrapedCourses(result.courses);
   }
 
-  /// 执行脚本并等待它通过 JS 通道回传结果。
-  ///
-  /// [build] 会拿到本次请求的 token 并生成脚本，脚本回包时必须带回同样的
-  /// token，否则会被 [_onBridgeMessage] 丢掉。
   Future<JwxtBridgeResult?> _runScript(
     String Function(String token) build, {
     Duration timeout = const Duration(seconds: 25),
@@ -357,8 +342,7 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
     }
     final String token =
         'tm-${DateTime.now().microsecondsSinceEpoch}-${_runSeq++}';
-    final Completer<JwxtBridgeResult> completer =
-        Completer<JwxtBridgeResult>();
+    final Completer<JwxtBridgeResult> completer = Completer<JwxtBridgeResult>();
     _pending = completer;
     _pendingToken = token;
     try {
@@ -369,8 +353,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
         return null;
       }
       final JwxtBridgeResult result = await completer.future.timeout(timeout);
-      // 脚本自己报了失败：记下原因，并按「没拿到结果」返回，
-      // 这样两个调用方不用各写一遍这段判断。
       if (!result.isOk) {
         if (result.message.isNotEmpty) {
           _attemptErrors.add(result.message);
@@ -390,7 +372,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
   }
 }
 
-/// 桌面端等没有 WebView 实现的平台。
 class _UnsupportedPlatform extends StatelessWidget {
   const _UnsupportedPlatform();
 
@@ -413,9 +394,7 @@ class _UnsupportedPlatform extends StatelessWidget {
             Text('当前平台不支持网页登录', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
-              '网页登录目前只在 Android / iOS 上可用。'
-              '在其他平台上请改用「粘贴导入」，'
-              '或先在手机上打开一次登录页。',
+              '网页登录目前只在 Android / iOS 上可用',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -452,9 +431,8 @@ class _Banner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: color),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: color),
             ),
           ),
         ],

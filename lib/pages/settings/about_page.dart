@@ -1,9 +1,12 @@
+///about.dart
+///该文件是关于页，没什么好说的，就是说明一下软件的设计框架以及相关开发信息
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../widgets/page_scaffold.dart';
 import '../../widgets/section_card.dart';
 
-/// 关于页：版本与数据说明。
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 

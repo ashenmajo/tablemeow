@@ -1,3 +1,8 @@
+///layout_setting_page.dart
+///该文件是布局设置页
+///可以按照偏好修改课表UI
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../data/demo_timetable.dart';
@@ -11,7 +16,6 @@ import '../../widgets/section_card.dart';
 import '../../widgets/timetable_grid.dart';
 import '../../widgets/timetable_style_sections.dart';
 
-/// 布局与尺寸
 class LayoutSettingsPage extends StatefulWidget {
   const LayoutSettingsPage({super.key});
 

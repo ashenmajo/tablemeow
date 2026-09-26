@@ -1,3 +1,7 @@
+///timetable_data_show.dart
+///该文件是课表数据展示页,从data_setting_page.dart的“数据管理”选项进入
+library;
+
 import 'package:flutter/material.dart';
 import 'package:tablemeow/models/course_session.dart';
 import 'package:tablemeow/models/semester.dart';
@@ -5,7 +9,6 @@ import 'package:tablemeow/models/semester.dart';
 import '../../widgets/page_scaffold.dart';
 import '../../widgets/section_card.dart';
 
-/// 课表数据：逐条列出导入的上课安排。
 class TimetableDataShow extends StatelessWidget {
   const TimetableDataShow({super.key, required this.sorted});
   final List<CourseSession> sorted;

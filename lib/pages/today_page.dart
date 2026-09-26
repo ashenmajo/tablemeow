@@ -1,3 +1,7 @@
+///today_page.dart
+///该文件是今日页
+library;
+
 import 'package:flutter/material.dart';
 
 import '../models/course_session.dart';
@@ -11,7 +15,6 @@ import '../widgets/course_detail_sheet.dart';
 import '../theme/course_palette.dart';
 import '../widgets/empty_state.dart';
 
-/// 今日页：当天课程时间轴与进行状态。
 class TodayPage extends StatelessWidget {
   const TodayPage({super.key});
 
@@ -63,7 +66,6 @@ class TodayPage extends StatelessWidget {
   }
 }
 
-/// 顶部日期与周次信息。
 class _DayHeader extends StatelessWidget {
   const _DayHeader({
     required this.date,
@@ -80,8 +82,7 @@ class _DayHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final String weekdayName =
-        Semester.weekdayNames[(date.weekday - 1).clamp(0, 6)];
+    final String weekdayName = Semester.weekdayNames[(date.weekday - 1)];
 
     return Card(
       color: theme.colorScheme.primaryContainer,
@@ -113,7 +114,6 @@ class _DayHeader extends StatelessWidget {
   }
 }
 
-/// 今日的一节课。
 class _TodayCourseCard extends StatelessWidget {
   const _TodayCourseCard({
     required this.session,
@@ -238,7 +238,6 @@ class _StatusBadge extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final String label = _label();
     final Color background = switch (status) {
-      // 进行中的课程用主题主色，避免与课程自身配色混淆。
       _CourseStatus.ongoing => theme.colorScheme.primary,
       _CourseStatus.upcoming => theme.colorScheme.secondaryContainer,
       _CourseStatus.finished => theme.colorScheme.surfaceContainerHighest,
@@ -267,13 +266,13 @@ class _StatusBadge extends StatelessWidget {
         final int minutes = range == null
             ? 0
             : range!.end.difference(now).inMinutes;
-        return '进行中 · 还剩 ${minutes <= 0 ? 1 : minutes} 分钟';
+        return '进行中 · 还剩 $minutes分钟';
       case _CourseStatus.upcoming:
         final int minutes = range == null
             ? 0
             : range!.start.difference(now).inMinutes;
         if (minutes < 60) {
-          return '${minutes <= 0 ? 1 : minutes} 分钟后';
+          return '$minutes分钟后';
         }
         return '${(minutes / 60).floor()} 小时后';
       case _CourseStatus.finished:

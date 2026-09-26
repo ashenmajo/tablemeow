@@ -1,3 +1,7 @@
+///import_page.dart
+///该文件是课表导入页
+library;
+
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -13,11 +17,8 @@ import '../widgets/page_scaffold.dart';
 import '../widgets/section_card.dart';
 import 'webview_login_page.dart';
 
-/// 导入页：打开学校登录页显式登录后读取课表。
 class ImportPage extends StatefulWidget {
   const ImportPage({super.key, this.loginStore});
-
-  /// 登录地址的存储实现，为空时使用 shared_preferences。
   final JwxtLoginStore? loginStore;
 
   @override
@@ -30,7 +31,6 @@ class _ImportPageState extends State<ImportPage> {
 
   final TextEditingController _urlController = TextEditingController();
 
-  final String _term = '3';
   String? _error;
 
   @override
@@ -122,7 +122,7 @@ class _ImportPageState extends State<ImportPage> {
     final String url = _urlController.text.trim();
     final Uri? parsed = Uri.tryParse(url);
     if (parsed == null || !parsed.hasScheme || parsed.host.isEmpty) {
-      setState(() => _error = '请填写完整的登录地址，例如 https://jw.example.edu.cn');
+      setState(() => _error = '请填写完整的登录地址');
       return;
     }
 
@@ -137,7 +137,6 @@ class _ImportPageState extends State<ImportPage> {
           MaterialPageRoute<JwxtImportResult>(
             builder: (BuildContext context) => WebViewLoginPage(
               initialUrl: url,
-              term: _term,
               totalWeeks: state.semester.totalWeeks,
             ),
           ),

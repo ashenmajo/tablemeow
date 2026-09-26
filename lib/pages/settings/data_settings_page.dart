@@ -1,3 +1,8 @@
+///data_setting_page.dart
+///该文件是数据管理页
+///可以删除课表数据和导入课表产生的网页数据
+library;
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -9,7 +14,6 @@ import '../../widgets/page_scaffold.dart';
 import '../../widgets/section_card.dart';
 import '../../pages/settings/timetable_data_show.dart';
 
-/// 数据管理：课表数据量、清空课表、清理网页数据。
 class DataSettingsPage extends StatelessWidget {
   const DataSettingsPage({super.key});
 
@@ -127,6 +131,7 @@ class DataSettingsPage extends StatelessWidget {
   void _toast(ScaffoldMessengerState messenger, String message) {
     messenger.showSnackBar(SnackBar(content: Text(message)));
   }
+
   static Future<bool> _confirm(
     BuildContext context, {
     required String title,

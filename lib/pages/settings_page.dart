@@ -1,3 +1,8 @@
+///settings_page.dart
+///该文件是所有设置和信息的入口页
+///包含了：布局与尺寸、配色、显示内容、节次时间、学期设置、主题、数据管理、关于
+library;
+
 import 'package:flutter/material.dart';
 
 import '../models/semester.dart';
@@ -14,7 +19,6 @@ import 'settings/period_settings_page.dart';
 import 'settings/semester_settings_page.dart';
 import 'settings/style_section_pages.dart';
 
-/// 设置页：按分类列出入口，点进去是各自的设置页。
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -46,7 +50,8 @@ class SettingsPage extends StatelessWidget {
           _SettingsTile(
             icon: Icons.grid_view_outlined,
             title: '布局与尺寸',
-            subtitle: '每节 ${style.autoCellHeight ? '自动' : '${style.cellHeight.round()} dp'}'
+            subtitle:
+                '每节 ${style.autoCellHeight ? '自动' : '${style.cellHeight.round()} dp'}'
                 ' · 字号 ${style.fontScale.toStringAsFixed(2)}×'
                 ' · ${_lineHeightLabel(style.lineHeight)}',
             onTap: () => _open(context, const LayoutSettingsPage()),
@@ -94,7 +99,8 @@ class SettingsPage extends StatelessWidget {
       child: _SettingsTile(
         icon: Icons.contrast,
         title: '主题',
-        subtitle: '${_themeModeLabel(style.themeMode)}'
+        subtitle:
+            '${_themeModeLabel(style.themeMode)}'
             '${style.oledBlack ? ' · 纯黑' : ''}',
         onTap: () => _open(context, const ThemeSettingsPage()),
       ),
@@ -108,7 +114,8 @@ class SettingsPage extends StatelessWidget {
       child: _SettingsTile(
         icon: Icons.folder_outlined,
         title: '数据管理',
-        subtitle: '${state.sessions.length} 条上课安排 · '
+        subtitle:
+            '${state.sessions.length} 条上课安排 · '
             '${state.timetable.courseCount} 门课程',
         onTap: () => _open(context, const DataSettingsPage()),
       ),
@@ -145,13 +152,11 @@ class SettingsPage extends StatelessWidget {
   };
 
   static void _open(BuildContext context, Widget page) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (BuildContext context) => page),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (BuildContext context) => page));
   }
 }
 
-/// 设置项：图标 + 标题 + 当前值 + 右侧箭头。
 class _SettingsTile extends StatelessWidget {
   const _SettingsTile({
     required this.icon,

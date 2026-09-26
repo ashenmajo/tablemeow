@@ -1,3 +1,7 @@
+///timetable_page.dart
+///该文件是课表页
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -12,7 +16,6 @@ import '../widgets/timetable_grid.dart';
 import '../widgets/week_selector.dart';
 import '../pages/import_page.dart';
 
-/// 课表页：周视图，左右滑动切换周次，点击课程块查看详情。
 class TimetablePage extends StatefulWidget {
   const TimetablePage({super.key});
 
@@ -21,7 +24,6 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetablePageState extends State<TimetablePage> {
-  /// 每一周是 PageView 的一页，左右滑动有跟手的切换动画。
   PageController? _pageController;
 
   static const Duration _switchDuration = Duration(milliseconds: 260);
@@ -34,8 +36,7 @@ class _TimetablePageState extends State<TimetablePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final PageController? controller = _pageController;
-    // 课表还没建出来（数据还在读）时不要在这里创建控制器：
-    // 那会把「第 1 周」当成初始页，等数据读完就停在第一周不动了。
+    // 课表还没建出来时不能在这里创建控制器，数据还没读完，不然会把第 1 周当成初始页，等数据读完就停在第一周不动了。
     if (controller == null ||
         !controller.hasClients ||
         controller.page == null) {
@@ -44,9 +45,6 @@ class _TimetablePageState extends State<TimetablePage> {
     _syncPage(AppScope.of(context), controller);
   }
 
-  /// 让 PageView 跟上 [AppState.selectedWeek]。
-  ///
-  /// 由滑动本身触发的周次变化此时页码已经一致，不会再动。
   void _syncPage(AppState state, PageController controller) {
     final int target = _pageOf(state, state.selectedWeek);
     final int current = controller.page!.round();
@@ -69,7 +67,6 @@ class _TimetablePageState extends State<TimetablePage> {
         .push(MaterialPageRoute<void>(builder: (BuildContext context) => page));
   }
 
-  /// 周次 → PageView 页码（都从 0 开始）。
   static int _pageOf(AppState state, int week) =>
       (week - 1).clamp(0, math.max(state.semester.totalWeeks - 1, 0));
 
@@ -115,7 +112,6 @@ class _TimetablePageState extends State<TimetablePage> {
         ),
       );
     }
-    // 控制器在这里（马上要建 PageView 时）才创建，初始页就是当前显示的那一周。
     final PageController controller = _pageController ??= PageController(
       initialPage: _pageOf(state, state.selectedWeek),
     );
@@ -162,7 +158,7 @@ class _TimetablePageState extends State<TimetablePage> {
     );
   }
 
-  /// 该周实际渲染的节次：按最后一节课裁剪，避免出现大片空白。
+  /// 这里按最后一节课裁剪，不然课表和导航栏之间会出现大片空白。
   static List<PeriodTime> _visiblePeriods(AppState state, int week) {
     final int count = state.timetable.visiblePeriodCount(week);
     return state.semester.periods.take(count).toList();

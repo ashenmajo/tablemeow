@@ -1,3 +1,8 @@
+///style_section_pages.dart
+///该文件集成了三个页面：配色页、显示内容页、主题页
+///因为这三个页面的框架都是一样的，所以集成在一起了
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../models/timetable_style.dart';
@@ -7,7 +12,6 @@ import '../../widgets/page_scaffold.dart';
 import '../../widgets/section_card.dart';
 import '../../widgets/timetable_style_sections.dart';
 
-/// 「配色」「显示内容」「主题」三页共用的骨架。
 class _StyleSectionPage extends StatelessWidget {
   const _StyleSectionPage({
     required this.title,
@@ -15,13 +19,9 @@ class _StyleSectionPage extends StatelessWidget {
     required this.sectionBuilder,
   });
 
-  /// 页面标题，同时用作卡片标题。
   final String title;
-
-  /// 页面顶部的一句说明。
   final String description;
 
-  /// 用当前的外观设置造出要显示的区块。
   final Widget Function(
     TimetableStyle style,
     ValueChanged<TimetableStyle> onChanged,
@@ -47,7 +47,7 @@ class _StyleSectionPage extends StatelessWidget {
   }
 }
 
-/// 配色
+/// 配色页
 class ColorSettingsPage extends StatelessWidget {
   const ColorSettingsPage({super.key});
 
@@ -64,7 +64,7 @@ class ColorSettingsPage extends StatelessWidget {
   }
 }
 
-/// 显示内容
+/// 显示内容页
 class DisplaySettingsPage extends StatelessWidget {
   const DisplaySettingsPage({super.key});
 
@@ -81,7 +81,7 @@ class DisplaySettingsPage extends StatelessWidget {
   }
 }
 
-/// 主题
+/// 主题页
 class ThemeSettingsPage extends StatelessWidget {
   const ThemeSettingsPage({super.key});
 
