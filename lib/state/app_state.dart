@@ -51,9 +51,6 @@ class AppState extends ChangeNotifier {
   /// 当前显示的周次是不是「本周」。
   bool get isViewingCurrentWeek => _selectedWeek == currentWeek;
 
-  /// 当前显示周的周一。
-  DateTime get selectedWeekStart => semester.weekStart(_selectedWeek);
-
   /// 当前显示周的课程。
   List<CourseSession> get selectedWeekSessions =>
       _timetable.sessionsOfWeek(_selectedWeek);

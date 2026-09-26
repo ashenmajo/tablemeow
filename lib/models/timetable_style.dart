@@ -404,11 +404,7 @@ class TimetableStyle {
     'oledBlack': oledBlack,
   };
 
-  /// 兼容老版本：字号存的是绝对值，周末开关存在学期设置里。
-  factory TimetableStyle.fromJson(
-    Map<String, dynamic> json, {
-    bool? legacyShowWeekend,
-  }) {
+  factory TimetableStyle.fromJson(Map<String, dynamic> json) {
     double fontScale = (json['fontScale'] as num? ?? 1).toDouble();
     final Object? legacyFontSize = json['fontSize'];
     if (json['fontScale'] == null && legacyFontSize is num) {
@@ -454,7 +450,7 @@ class TimetableStyle {
         CourseTextAlignment.values,
         json['courseTextAlignment'],
       ),
-      showWeekend: json['showWeekend'] as bool? ?? legacyShowWeekend ?? true,
+      showWeekend: json['showWeekend'] as bool? ?? true,
       showPeriodColumn: json['showPeriodColumn'] as bool? ?? true,
       showWeekSelector: json['showWeekSelector'] as bool? ?? true,
       showGrid: json['showGrid'] as bool? ?? true,

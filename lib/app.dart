@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'data/jwxt/jwxt_login_store.dart';
 import 'data/timetable_storage.dart';
 import 'models/timetable_style.dart';
 import 'navigation/home_shell.dart';
@@ -15,13 +14,10 @@ import 'theme/app_theme.dart';
 /// 把 [AppState] 通过 [AppScope] 交给整棵子树，
 /// 并让主题跟着设置里的主色 / 明暗 / 纯黑一起变。
 class TableMeowApp extends StatefulWidget {
-  const TableMeowApp({super.key, this.storage, this.loginStore, this.clock});
+  const TableMeowApp({super.key, this.storage, this.clock});
 
   /// 课表存储，默认走 shared_preferences。
   final TimetableStorage? storage;
-
-  /// 教务系统登录地址存储，默认走 shared_preferences。
-  final JwxtLoginStore? loginStore;
 
   /// 时间来源，测试可以注入固定时间。
   final DateTime Function()? clock;
@@ -78,7 +74,7 @@ class _TableMeowAppState extends State<TableMeowApp> {
                   ),
                 ),
             themeMode: AppTheme.modeOf(style.themeMode),
-            home: HomeShell(loginStore: widget.loginStore),
+            home: HomeShell(),
           );
         },
       ),

@@ -36,13 +36,6 @@ const List<AppDestination> appDestinations = <AppDestination>[
     icon: Icons.today_outlined,
     selectedIcon: Icons.today,
   ),
-  //“导入”迁移到“课表”右上角
-  // AppDestination(
-  //   tab: AppTab.importData,
-  //   label: '导入',
-  //   icon: Icons.cloud_download_outlined,
-  //   selectedIcon: Icons.cloud_download,
-  // ),
   AppDestination(
     tab: AppTab.settings,
     label: '设置',
@@ -50,11 +43,6 @@ const List<AppDestination> appDestinations = <AppDestination>[
     selectedIcon: Icons.settings,
   ),
 ];
-
-/// 按页面标识取入口定义。
-AppDestination destinationOf(AppTab tab) => appDestinations.firstWhere(
-  (AppDestination destination) => destination.tab == tab,
-);
 
 /// [tab] 在底部导航中的下标。
 int indexOfTab(AppTab tab) =>

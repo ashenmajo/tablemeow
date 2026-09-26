@@ -6,7 +6,7 @@ Flutter 实现的课表应用，界面采用 Material 3 Expressive 设计。
 ## 功能
 
 - **课表**：周视图网格，左侧是节次与上课时间，右侧每天一列，
-  周末、节次列、周次条、网格线都可以在「设置 → 课表外观」里开关。
+  周末、节次列、周次条、网格线都可以在「设置 → 布局与尺寸」里开关。
   左侧每节显示节次与开始 / 结束时间；今天所在列会高亮，正在上的那节课会画出一条时间线。
   每次回到应用都会自动跳回本周。
   顶部（或左右滑动）可切换周次、弹窗直选周次、一键回到本周。
@@ -15,6 +15,7 @@ Flutter 实现的课表应用，界面采用 Material 3 Expressive 设计。
   教师、周次、节次时间点开详情查看。
   点击课程块查看课程详情，并可给这门课单独指定颜色与别名。
   课程块用 `StrutStyle` 把行高钉死，中文回退字体不会把格子撑破。
+  右上角的 `+` 是导入入口；课表为空时，空状态里也有一个「去导入课表」按钮。
 - **今日**：当天课程按节次排序，标注「进行中 / N 分钟后 / 已结束」，
   并显示当天日期与所属周次。
 - **导入**：在应用内用 WebView 打开学校登录页，由用户自己完成登录。
@@ -33,14 +34,17 @@ Flutter 实现的课表应用，界面采用 Material 3 Expressive 设计。
   密码只在登录页面里输入，应用不接触也不保存。
 - **设置**：按分类列入口，点进去是各自的设置页。
   **课表**下有 **布局与尺寸**（每节高度自动 / 56–140dp、字号缩放 0.8–1.5×、
-  行高紧凑 / 标准 / 宽松、列宽，以及周末 / 节次列 / 周次条 / 网格线开关）、
+  行高紧凑 / 标准 / 宽松、列宽与块间距、课程块内外边距与圆角、文字对齐、
+  表头高度、节次列宽，以及表头日期 / 每节结束时间 / 周末 / 节次列 /
+  周次条 / 网格线 / 高亮今天 / 当前时间线这些开关）、
   **配色**（默认「跟随主题色」，课程块直接用主题配色的容器色，随主色与明暗自动协调；
   也可以切到自定义色板（Material / 马卡龙 / 莫兰迪 / 高对比）或单色，
   文字颜色自动 / 深 / 浅；单门课的颜色与别名在课程详情里设置）、
   **显示内容**（地点、教师、去掉教师职称、地点是否拆两行、课程名全名 / 别名）、
   **节次时间**（可按「上午 / 下午 / 晚上的开始时间 + 每节时长 + 课间休息」一键重排，也能逐节手改）与**学期设置**；
   **主题**（主色 —— 整套 Material 3 配色与课表颜色都由它推导，亮色 / 暗色 / 跟随系统、纯黑模式）；
-  以及**数据管理**（课表数据量、清空课表、清除教务网页数据）与**关于**。
+  以及**数据管理**（课表数据量、逐条查看上课安排的「课表数据」页、清空课表、清除教务网页数据）
+  与**关于**。
 - 课表数据保存在本机（`shared_preferences`），启动后自动恢复。
 - 配色以靛蓝为种子色推导（导航栏、按钮、卡片、输入框同一套色板），
   课程块只在蓝紫色相里取几个低饱和浅色。
@@ -65,6 +69,7 @@ lib/
 │       ├── jwxt_web_scripts.dart   # 注入 WebView 的抓取脚本
 │       ├── jwxt_bridge_result.dart # 脚本回传结果的模型
 │       ├── jwxt_course_parser.dart # 正方课表字段与表格单元格解析
+│       ├── jwxt_import_result.dart # 一次导入的结果（安排 + 提醒）
 │       └── jwxt_login_store.dart   # 登录地址记忆
 ├── state/
 │   ├── app_state.dart              # 课表数据、选中周次、持久化
@@ -73,14 +78,25 @@ lib/
 │   ├── app_destination.dart        # 底部导航入口清单
 │   └── home_shell.dart             # 主界面外壳：底部导航栏 + 内容区
 ├── pages/
-│   ├── timetable_page.dart         # 课表页
+│   ├── timetable_page.dart         # 课表页（导入入口在右上角）
 │   ├── today_page.dart             # 今日页
-│   ├── import_page.dart            # 导入页
+│   ├── import_page.dart            # 导入页：填登录地址后打开网页登录
 │   ├── webview_login_page.dart     # 网页登录页（WebView）
 │   ├── settings_page.dart          # 设置首页（分类入口）
-│   └── settings/                   # 设置子页：布局 / 配色 / 显示 / 主题 / 节次 / 学期 / 数据 / 关于
+│   ├── switch_timetable.dart       # 未被引用的占位实现（见「已知限制」）
+│   └── settings/                   # 设置子页
+│       ├── layout_settings_page.dart    # 布局与尺寸
+│       ├── color_settings_page.dart     # 配色
+│       ├── display_settings_page.dart   # 显示内容
+│       ├── theme_settings_page.dart     # 主题
+│       ├── period_settings_page.dart    # 节次时间
+│       ├── semester_settings_page.dart  # 学期设置
+│       ├── data_settings_page.dart      # 数据管理
+│       ├── timetable_data_show.dart     # 课表数据明细
+│       └── about_page.dart              # 关于
 ├── theme/
-│   └── app_theme.dart              # Material 3 Expressive 主题
+│   ├── app_theme.dart              # Material 3 Expressive 主题
+│   └── course_palette.dart         # 按课程名生成稳定配色
 ├── utils/
 │   ├── date_format.dart            # 少量日期格式化
 │   └── timeline.dart               # 课表时间线位置计算
@@ -89,7 +105,6 @@ lib/
     ├── timetable_style_sections.dart # 外观设置的四组控件
     ├── week_selector.dart          # 周次选择条
     ├── course_detail_sheet.dart    # 课程详情弹窗
-    ├── course_palette.dart         # 按课程名生成稳定配色
     ├── labeled_field.dart          # 标题独立在输入框上方的表单字段
     ├── page_scaffold.dart          # 内容页骨架
     ├── section_card.dart           # 带标题的区块卡片
@@ -98,9 +113,11 @@ lib/
 
 ## 导航结构
 
-界面使用底部导航栏（`NavigationBar`）承载四个页面：课表、今日、导入、设置。
-内容区用 `IndexedStack` 承载，切换页面时各页状态（滚动位置、表单内容）都会保留；
-导入完成后会自动跳回课表页。
+界面使用底部导航栏（`NavigationBar`）承载三个页面：**课表**、**今日**、**设置**。
+内容区用 `IndexedStack` 承载，切换页面时各页状态（滚动位置、表单内容）都会保留。
+
+**导入**不在导航栏里：入口是课表页右上角的 `+` 按钮（课表为空时，
+空状态里的「去导入课表」也走同一个页面）。导入完成后会自动跳回课表页。
 
 ## 新增一个页面
 
@@ -121,6 +138,21 @@ lib/
 `lib/data/timetable_text_parser.dart` 还保留了「每行一条文本」的解析实现
 （字段顺序：课程名, 星期, 节次, 周次, 地点, 教师），界面暂未提供入口，
 解析逻辑由 `test/jwxt_parser_test.dart` 覆盖。
+
+## 测试
+
+`flutter test` 覆盖模型、解析、状态与界面，共 8 个文件：
+
+| 文件 | 覆盖 |
+| --- | --- |
+| `timetable_model_test.dart` | 学期周次换算、课表查询、外观设置、自动排节次、序列化 |
+| `jwxt_parser_test.dart` | 正方课表 JSON、节次 / 周次文本、粘贴导入 |
+| `jwxt_bridge_test.dart` | 注入脚本、脚本回传结果、页面表格单元格解析 |
+| `app_state_test.dart` | 首次加载的默认学期、导入与还原、清空、周次范围 |
+| `timeline_test.dart` | 时间线落点与课间不显示 |
+| `home_shell_test.dart` | 导航切换、周次滑动、详情弹窗、设置子页、回到本周 |
+| `webview_login_test.dart` | 登录地址回填、非移动端的禁用提示 |
+| `visual_preview_test.dart` | 四个页面的界面预览图（`test/goldens/`） |
 
 ## 开发命令
 
@@ -146,3 +178,6 @@ flutter run
 - 校外访问需要学校 VPN，先登 VPN 再登教务即可，两步都在同一个 WebView 里完成。
 - 部分学校站点只提供 http，因此 Android 端开启了 `usesCleartextTraffic`。
 - 时间线依赖设备本地时间，节次时间可在设置页按学校作息调整。
+- `lib/pages/switch_timetable.dart` 是一个没人引用的占位实现：里面的同名
+  `showCourseDetailSheet` 只渲染一个空 Column，真正生效的是
+  `lib/widgets/course_detail_sheet.dart` 里的那个。接入前不要从这个文件导入。

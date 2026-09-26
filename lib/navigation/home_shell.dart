@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../data/jwxt/jwxt_login_store.dart';
 import '../pages/settings_page.dart';
 import '../pages/timetable_page.dart';
 import '../pages/today_page.dart';
@@ -11,10 +10,7 @@ import '../state/app_state.dart';
 import 'app_destination.dart';
 
 class HomeShell extends StatefulWidget {
-  const HomeShell({super.key, this.loginStore});
-
-  /// 教务系统登录地址存储，测试可以注入内存实现。
-  final JwxtLoginStore? loginStore;
+  const HomeShell({super.key});
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -94,9 +90,6 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         return const TimetablePage();
       case AppTab.today:
         return const TodayPage();
-      //迁移到timetable右上角
-      // case AppTab.importData:
-      //   return ImportPage(loginStore: widget.loginStore);
       case AppTab.settings:
         return const SettingsPage();
     }

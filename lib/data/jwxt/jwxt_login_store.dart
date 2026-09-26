@@ -23,18 +23,3 @@ class SharedPreferencesJwxtLoginStore implements JwxtLoginStore {
     await prefs.setString(storageKey, url);
   }
 }
-
-/// 只存在内存里的实现，用于测试。
-class MemoryJwxtLoginStore implements JwxtLoginStore {
-  MemoryJwxtLoginStore([this._url]);
-
-  String? _url;
-
-  String? get url => _url;
-
-  @override
-  Future<String?> readLoginUrl() async => _url;
-
-  @override
-  Future<void> writeLoginUrl(String url) async => _url = url;
-}

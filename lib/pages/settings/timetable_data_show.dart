@@ -5,14 +5,12 @@ import 'package:tablemeow/models/semester.dart';
 import '../../widgets/page_scaffold.dart';
 import '../../widgets/section_card.dart';
 
-/// 关于页：版本与数据说明。
+/// 课表数据：逐条列出导入的上课安排。
 class TimetableDataShow extends StatelessWidget {
   const TimetableDataShow({super.key, required this.sorted});
   final List<CourseSession> sorted;
   @override
   Widget build(BuildContext context) {
-    // final ThemeData theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(title: const Text('课表数据')),
       body: PageScaffold(

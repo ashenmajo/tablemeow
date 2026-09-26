@@ -4,8 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// 课表持久化接口。
 ///
-/// 生产环境使用 [SharedPreferencesTimetableStorage]，
-/// 测试或预览可以换成 [MemoryTimetableStorage]。
+/// 生产环境使用 [SharedPreferencesTimetableStorage]。
 abstract interface class TimetableStorage {
   Future<Map<String, dynamic>?> readJson();
 
@@ -44,22 +43,4 @@ class SharedPreferencesTimetableStorage implements TimetableStorage {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(storageKey);
   }
-}
-
-/// 只存在内存里的课表存储，用于测试与预览。
-class MemoryTimetableStorage implements TimetableStorage {
-  MemoryTimetableStorage([this._json]);
-
-  Map<String, dynamic>? _json;
-
-  Map<String, dynamic>? get json => _json;
-
-  @override
-  Future<Map<String, dynamic>?> readJson() async => _json;
-
-  @override
-  Future<void> writeJson(Map<String, dynamic> json) async => _json = json;
-
-  @override
-  Future<void> clear() async => _json = null;
 }

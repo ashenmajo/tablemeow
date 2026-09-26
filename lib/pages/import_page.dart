@@ -29,29 +29,20 @@ class _ImportPageState extends State<ImportPage> {
       widget.loginStore ?? SharedPreferencesJwxtLoginStore();
 
   final TextEditingController _urlController = TextEditingController();
-  final TextEditingController _schoolYearController = TextEditingController();
 
-  String _term = '3';
+  final String _term = '3';
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _schoolYearController.text = _currentSchoolYear();
     _restoreLoginUrl();
   }
 
   @override
   void dispose() {
     _urlController.dispose();
-    _schoolYearController.dispose();
     super.dispose();
-  }
-
-  /// 按当前时间推测学年，1-8 月归入上一年开学的学年。
-  static String _currentSchoolYear([DateTime? today]) {
-    final DateTime now = today ?? DateTime.now();
-    return (now.month >= 8 ? now.year : now.year - 1).toString();
   }
 
   Future<void> _restoreLoginUrl() async {
@@ -146,7 +137,6 @@ class _ImportPageState extends State<ImportPage> {
           MaterialPageRoute<JwxtImportResult>(
             builder: (BuildContext context) => WebViewLoginPage(
               initialUrl: url,
-              schoolYear: _schoolYearController.text.trim(),
               term: _term,
               totalWeeks: state.semester.totalWeeks,
             ),
@@ -159,12 +149,7 @@ class _ImportPageState extends State<ImportPage> {
       if (result.warning.isNotEmpty) result.warning,
       if (_semesterStartLooksDefault(state)) _semesterStartHint,
     ].join('；');
-    await _applySessions(
-      state,
-      result.sessions,
-      source: '教务系统',
-      warning: warning,
-    );
+    await _applySessions(state, result.sessions, warning: warning);
   }
 
   static const String _semesterStartHint =
@@ -178,7 +163,6 @@ class _ImportPageState extends State<ImportPage> {
   Future<void> _applySessions(
     AppState state,
     List<CourseSession> sessions, {
-    required String source,
     String warning = '',
   }) async {
     await state.importSessions(sessions);
@@ -186,7 +170,6 @@ class _ImportPageState extends State<ImportPage> {
       return;
     }
     Navigator.of(context).pop();
-    //  final String suffix = warning.isEmpty ? '' : '（$warning）';
     final courseCount = sessions
         .map((CourseSession s) {
           return s.name;

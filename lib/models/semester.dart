@@ -9,7 +9,6 @@ class Semester {
     required this.startDate,
     this.totalWeeks = 20,
     this.periods = defaultPeriods,
-    this.showWeekend = true,
   });
 
   /// 第 1 周的周一，课表所有日期都由它推算。
@@ -20,11 +19,6 @@ class Semester {
 
   /// 每节课的时间安排，按节次升序。
   final List<PeriodTime> periods;
-
-  /// 课表是否显示周六与周日。
-  ///
-  /// 默认显示：周末没课时也保留两列，方便一眼看出周末确实没课。
-  final bool showWeekend;
 
   /// 星期一至星期日的中文名，下标 0 对应周一。
   static const List<String> weekdayNames = <String>[
@@ -100,9 +94,6 @@ class Semester {
     return day.subtract(Duration(days: day.weekday - 1));
   }
 
-  /// 课表实际显示的列数。
-  int get weekdayCount => showWeekend ? 7 : 5;
-
   /// 星期名称（1 表示周一）。
   String weekdayName(int weekday) => weekdayNames[(weekday - 1).clamp(0, 6)];
 
@@ -139,13 +130,11 @@ class Semester {
     DateTime? startDate,
     int? totalWeeks,
     List<PeriodTime>? periods,
-    bool? showWeekend,
   }) {
     return Semester(
       startDate: startDate ?? this.startDate,
       totalWeeks: totalWeeks ?? this.totalWeeks,
       periods: periods ?? this.periods,
-      showWeekend: showWeekend ?? this.showWeekend,
     );
   }
 
@@ -155,7 +144,6 @@ class Semester {
     'periods': <Map<String, dynamic>>[
       for (final PeriodTime period in periods) period.toJson(),
     ],
-    'showWeekend': showWeekend,
   };
 
   factory Semester.fromJson(Map<String, dynamic> json) {
@@ -172,7 +160,6 @@ class Semester {
       startDate: DateTime.parse(json['startDate'] as String),
       totalWeeks: (json['totalWeeks'] as num? ?? 20).toInt(),
       periods: periods.isEmpty ? defaultPeriods : periods,
-      showWeekend: json['showWeekend'] as bool? ?? true,
     );
   }
 
@@ -181,11 +168,10 @@ class Semester {
     return other is Semester &&
         other.startDate == startDate &&
         other.totalWeeks == totalWeeks &&
-        other.showWeekend == showWeekend &&
         listEquals(other.periods, periods);
   }
 
   @override
   int get hashCode =>
-      Object.hash(startDate, totalWeeks, showWeekend, Object.hashAll(periods));
+      Object.hash(startDate, totalWeeks, Object.hashAll(periods));
 }

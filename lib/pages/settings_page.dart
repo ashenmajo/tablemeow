@@ -8,13 +8,11 @@ import '../utils/date_format.dart';
 import '../widgets/page_scaffold.dart';
 import '../widgets/section_card.dart';
 import 'settings/about_page.dart';
-import 'settings/color_settings_page.dart';
 import 'settings/data_settings_page.dart';
-import 'settings/display_settings_page.dart';
 import 'settings/layout_settings_page.dart';
 import 'settings/period_settings_page.dart';
 import 'settings/semester_settings_page.dart';
-import 'settings/theme_settings_page.dart';
+import 'settings/style_section_pages.dart';
 
 /// 设置页：按分类列出入口，点进去是各自的设置页。
 class SettingsPage extends StatelessWidget {
