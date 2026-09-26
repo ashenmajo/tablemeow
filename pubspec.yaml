@@ -1,0 +1,30 @@
+name: tablemeow
+description: "TableMeow：Material 3 Expressive 课表应用"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  # 访问教务系统（登录 / 抓取课表）
+  http: ^1.6.0
+  # 显式登录教务系统（含 VPN / SSO 跳转）时展示真实登录页
+  webview_flutter: ^4.13.1
+  # 课表与设置的本地持久化
+  shared_preferences: ^2.5.5
+  # 日期与周次格式化
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
