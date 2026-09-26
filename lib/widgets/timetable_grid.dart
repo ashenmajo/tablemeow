@@ -251,7 +251,7 @@ class TimetableGrid extends StatelessWidget {
         .toList();
     final Color gridColor = theme.colorScheme.outlineVariant;
     final double? nowOffset = style.showCurrentTime && isCurrentDate
-        ? _nowOffset(periods, now, cellHeight)
+        ? Timeline.offsetOf(periods, now, cellHeight: cellHeight)
         : null;
 
     return Container(
@@ -319,13 +319,6 @@ class TimetableGrid extends StatelessWidget {
       ],
     );
   }
-
-  /// 当前时间在当列中的纵向偏移，落在课间或课外时返回 null。
-  double? _nowOffset(
-    List<PeriodTime> periods,
-    DateTime current,
-    double cellHeight,
-  ) => Timeline.offsetOf(periods, current, cellHeight: cellHeight);
 }
 
 bool _isSameDay(DateTime a, DateTime b) =>

@@ -46,5 +46,3 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
-# golden 测试失败时自动生成的对比图
-test/failures/

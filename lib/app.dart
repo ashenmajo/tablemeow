@@ -8,11 +8,6 @@ import 'state/app_scope.dart';
 import 'state/app_state.dart';
 import 'theme/app_theme.dart';
 
-/// 应用根组件。
-///
-/// 负责三件事：注入课表存储与时间来源、读取本地课表、
-/// 把 [AppState] 通过 [AppScope] 交给整棵子树，
-/// 并让主题跟着设置里的主色 / 明暗 / 纯黑一起变。
 class TableMeowApp extends StatefulWidget {
   const TableMeowApp({super.key, this.storage, this.clock});
 

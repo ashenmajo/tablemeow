@@ -45,10 +45,6 @@ class JwxtBridgeResult {
 
   bool get isOk => status == JwxtWebScripts.statusOk;
 
-  bool get isFromApi => source == JwxtWebScripts.sourceApi;
-
-  bool get isFromDocument => source == JwxtWebScripts.sourceDocument;
-
   /// 解析脚本回传的 JSON，无法识别时返回 null。
   static JwxtBridgeResult? tryDecode(String raw) {
     try {

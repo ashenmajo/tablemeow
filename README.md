@@ -63,8 +63,7 @@ lib/
 │   └── timetable.dart              # 课表聚合：查询、统计、序列化
 ├── data/
 │   ├── timetable_storage.dart      # 持久化接口与实现
-│   ├── demo_timetable.dart         # 示例课表（界面预览与测试用）
-│   ├── timetable_text_parser.dart  # 「每行一条文本」解析（界面暂未提供入口）
+│   ├── demo_timetable.dart         # 示例课表（界面预览用）
 │   └── jwxt/
 │       ├── jwxt_web_scripts.dart   # 注入 WebView 的抓取脚本
 │       ├── jwxt_bridge_result.dart # 脚本回传结果的模型
@@ -83,12 +82,9 @@ lib/
 │   ├── import_page.dart            # 导入页：填登录地址后打开网页登录
 │   ├── webview_login_page.dart     # 网页登录页（WebView）
 │   ├── settings_page.dart          # 设置首页（分类入口）
-│   ├── switch_timetable.dart       # 未被引用的占位实现（见「已知限制」）
 │   └── settings/                   # 设置子页
 │       ├── layout_settings_page.dart    # 布局与尺寸
-│       ├── color_settings_page.dart     # 配色
-│       ├── display_settings_page.dart   # 显示内容
-│       ├── theme_settings_page.dart     # 主题
+│       ├── style_section_pages.dart     # 配色 / 显示内容 / 主题（共用骨架）
 │       ├── period_settings_page.dart    # 节次时间
 │       ├── semester_settings_page.dart  # 学期设置
 │       ├── data_settings_page.dart      # 数据管理
@@ -135,36 +131,15 @@ lib/
 星期支持 `1`、`周一`；节次支持 `1-2`、`第 3-4 节`、正方 `jcs` 的补零写法 `0102`；
 周次支持 `1-16周`、`1,3,5-9周`、`2-14周(双)`、强智的 `2-11(周)`。
 
-`lib/data/timetable_text_parser.dart` 还保留了「每行一条文本」的解析实现
-（字段顺序：课程名, 星期, 节次, 周次, 地点, 教师），界面暂未提供入口，
-解析逻辑由 `test/jwxt_parser_test.dart` 覆盖。
-
-## 测试
-
-`flutter test` 覆盖模型、解析、状态与界面，共 8 个文件：
-
-| 文件 | 覆盖 |
-| --- | --- |
-| `timetable_model_test.dart` | 学期周次换算、课表查询、外观设置、自动排节次、序列化 |
-| `jwxt_parser_test.dart` | 正方课表 JSON、节次 / 周次文本、粘贴导入 |
-| `jwxt_bridge_test.dart` | 注入脚本、脚本回传结果、页面表格单元格解析 |
-| `app_state_test.dart` | 首次加载的默认学期、导入与还原、清空、周次范围 |
-| `timeline_test.dart` | 时间线落点与课间不显示 |
-| `home_shell_test.dart` | 导航切换、周次滑动、详情弹窗、设置子页、回到本周 |
-| `webview_login_test.dart` | 登录地址回填、非移动端的禁用提示 |
-| `visual_preview_test.dart` | 四个页面的界面预览图（`test/goldens/`） |
-
 ## 开发命令
 
 ```bash
 flutter pub get
 flutter analyze
-flutter test
 flutter run
 ```
 
-`flutter test --update-goldens test/visual_preview_test.dart` 会重新生成
-`test/goldens/` 下的界面预览图，用于人工核对排版。
+项目当前没有测试，改动后依赖 `flutter analyze` 与手动验证。
 
 ## 已知限制
 
@@ -178,6 +153,3 @@ flutter run
 - 校外访问需要学校 VPN，先登 VPN 再登教务即可，两步都在同一个 WebView 里完成。
 - 部分学校站点只提供 http，因此 Android 端开启了 `usesCleartextTraffic`。
 - 时间线依赖设备本地时间，节次时间可在设置页按学校作息调整。
-- `lib/pages/switch_timetable.dart` 是一个没人引用的占位实现：里面的同名
-  `showCourseDetailSheet` 只渲染一个空 Column，真正生效的是
-  `lib/widgets/course_detail_sheet.dart` 里的那个。接入前不要从这个文件导入。

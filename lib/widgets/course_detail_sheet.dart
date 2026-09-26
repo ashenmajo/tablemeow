@@ -246,10 +246,8 @@ Future<void> _editAlias(
 ) async {
   final String? result = await showDialog<String>(
     context: context,
-    builder: (BuildContext context) => _AliasDialog(
-      initial: current ?? session.name,
-      fallback: session.name,
-    ),
+    builder: (BuildContext context) =>
+        _AliasDialog(initial: current ?? session.name),
   );
   if (result == null) {
     return;
@@ -262,10 +260,9 @@ Future<void> _editAlias(
 /// 输入框控制器由弹窗自己持有并销毁：如果在 `showDialog` 返回后立刻
 /// dispose，弹窗还在退场动画里挂着，会触发 `_dependents.isEmpty` 断言。
 class _AliasDialog extends StatefulWidget {
-  const _AliasDialog({required this.initial, required this.fallback});
+  const _AliasDialog({required this.initial});
 
   final String initial;
-  final String fallback;
 
   @override
   State<_AliasDialog> createState() => _AliasDialogState();
@@ -286,11 +283,7 @@ class _AliasDialogState extends State<_AliasDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('显示名称'),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        //decoration: InputDecoration(hintText: widget.fallback),
-      ),
+      content: TextField(controller: _controller, autofocus: true),
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
