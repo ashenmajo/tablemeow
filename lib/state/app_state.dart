@@ -143,7 +143,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 切换底部导航页面。
   void openTab(AppTab tab) {
     if (tab == _selectedTab) {
       return;
@@ -155,7 +154,6 @@ class AppState extends ChangeNotifier {
   /// 左右滑动/按钮切换周次。
   void shiftWeek(int delta) => selectWeek(_selectedWeek + delta);
 
-  /// 回到本周。
   void goToCurrentWeek() => selectWeek(currentWeek);
 
   /// 重新计算依赖「当前时间」的界面（时间线、今日课程）。

@@ -781,7 +781,6 @@ class _TimetableThemeSectionState extends State<TimetableThemeSection> {
   }
 }
 
-/// 主色圆点。
 class _SeedDot extends StatelessWidget {
   const _SeedDot({
     required this.color,

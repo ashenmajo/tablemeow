@@ -25,7 +25,6 @@ class JwxtBridgeResult {
   /// 数据来源：教务系统接口或页面表格。
   final String source;
 
-  /// 接口返回的原始响应体。
   final String body;
 
   /// 页面表格抓到的课程条目。

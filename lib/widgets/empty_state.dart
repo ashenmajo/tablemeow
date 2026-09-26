@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// 列表或页面为空时的占位提示。
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,

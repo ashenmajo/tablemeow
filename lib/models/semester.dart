@@ -14,7 +14,6 @@ class Semester {
   /// 第 1 周的周一，课表所有日期都由它推算。
   final DateTime startDate;
 
-  /// 学期总周数。
   final int totalWeeks;
 
   /// 每节课的时间安排，按节次升序。
@@ -97,7 +96,6 @@ class Semester {
   /// 星期名称（1 表示周一）。
   String weekdayName(int weekday) => weekdayNames[(weekday - 1).clamp(0, 6)];
 
-  /// 第 [week] 周的周一。
   DateTime weekStart(int week) => startDate.add(Duration(days: (week - 1) * 7));
 
   /// 第 [week] 周星期 [weekday] 对应的日期。
@@ -110,7 +108,6 @@ class Semester {
     return day.difference(startDate).inDays ~/ 7 + 1;
   }
 
-  /// [date] 是否落在学期内。
   bool containsDate(DateTime date) {
     final int week = weekOfDate(date);
     return week >= 1 && week <= totalWeeks;

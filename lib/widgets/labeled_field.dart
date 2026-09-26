@@ -14,7 +14,6 @@ class LabeledField extends StatelessWidget {
   /// 输入框上方的标题。
   final String label;
 
-  /// 输入控件本体。
   final Widget child;
 
   /// 输入框下方的补充说明，可省略。

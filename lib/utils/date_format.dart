@@ -1,6 +1,5 @@
 // 轻量日期格式化工具：只做课表需要的少量格式化，避免引入 locale 依赖。
 
-/// 补零到两位。
 String twoDigits(int value) => value.toString().padLeft(2, '0');
 
 /// `08:05`

@@ -70,7 +70,6 @@ abstract final class CoursePalette {
     ...palettes[CoursePaletteKind.macaron]!,
   ];
 
-  /// 课程块的背景色。
   static Color surface(
     String name,
     TimetableStyle style,
@@ -89,7 +88,6 @@ abstract final class CoursePalette {
     return palette[_indexOf(name, palette.length)];
   }
 
-  /// 课程块上的文字颜色。
   static Color onSurface(
     String name,
     TimetableStyle style,

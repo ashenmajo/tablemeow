@@ -62,11 +62,9 @@ class Timetable {
       ..sort(_byPeriod);
   }
 
-  /// [date] 当天的课程。
   List<CourseSession> sessionsOn(DateTime date) =>
       sessionsAt(week: semester.weekOfDate(date), weekday: date.weekday);
 
-  /// 第 [week] 周的全部课程。
   List<CourseSession> sessionsOfWeek(int week) {
     return sessions
         .where((CourseSession session) => session.occursInWeek(week))
@@ -139,7 +137,6 @@ class Timetable {
   }
 }
 
-/// 一节课在某天的起止时刻。
 @immutable
 class PeriodTimeRange {
   const PeriodTimeRange({required this.start, required this.end});

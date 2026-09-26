@@ -29,10 +29,8 @@ class TimetableGrid extends StatelessWidget {
 
   final Semester semester;
 
-  /// 当前显示的周次。
   final int week;
 
-  /// 该周的全部课程。
   final List<CourseSession> sessions;
 
   /// 实际渲染的节次（已按该周课程裁剪）。
@@ -41,7 +39,6 @@ class TimetableGrid extends StatelessWidget {
   /// 当前时间，用于高亮今天与绘制时间线。
   final DateTime now;
 
-  /// 外观设置。
   final TimetableStyle style;
 
   /// 预览场景可只显示前几天，避免把完整周课表塞进小卡片。

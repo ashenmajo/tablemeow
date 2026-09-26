@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-/// 一天的三个时段：上午 / 下午 / 晚上。
 enum PeriodSession { morning, afternoon, evening }
 
-/// 一节课（小节）的时间安排。
 @immutable
 class PeriodTime {
   const PeriodTime({
@@ -57,7 +55,6 @@ class PeriodTime {
   /// 当天该节次的开始时刻，用于时间线、倒计时等比较。
   DateTime startAt(DateTime day) => _at(day, start);
 
-  /// 当天该节次的结束时刻。
   DateTime endAt(DateTime day) => _at(day, end);
 
   PeriodTime copyWith({int? index, String? start, String? end}) {

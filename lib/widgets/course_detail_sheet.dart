@@ -298,7 +298,6 @@ class _AliasDialogState extends State<_AliasDialog> {
   }
 }
 
-/// 可选颜色的圆点。
 class _ColorDot extends StatelessWidget {
   const _ColorDot({
     required this.color,

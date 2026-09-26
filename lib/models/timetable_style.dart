@@ -1,16 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// 主题模式：亮色 / 暗色 / 跟随系统。
 enum AppThemeMode { system, light, dark }
 
-/// 行高（行距）档位。
 enum CourseLineHeight { compact, standard, relaxed }
 
-/// 课程块中文字的横向对齐方式。
 enum CourseTextAlignment { left, center }
 
-/// 课程块配色的分配方式。
 enum CourseColorMode {
   /// 跟随主题色：用主题配色里的容器色，天然与主色协调（默认）。
   theme,

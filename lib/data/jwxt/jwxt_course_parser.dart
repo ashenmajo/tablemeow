@@ -57,7 +57,6 @@ class JwxtCourseParser {
     return const <Object?>[];
   }
 
-  /// 批量解析课程条目。
   List<CourseSession> parseItems(List<Object?> items) {
     final List<CourseSession> sessions = <CourseSession>[];
     for (final Object? item in items) {

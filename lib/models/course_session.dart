@@ -16,7 +16,6 @@ class CourseSession {
     this.location = '',
   });
 
-  /// 课程名称。
   final String name;
 
   /// 星期几：1 表示周一，7 表示周日。
