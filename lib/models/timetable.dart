@@ -74,18 +74,6 @@ class Timetable {
       ..sort(_byPeriod);
   }
 
-  /// [from] 之后最近的一节课（含正在上的课），用于「今日」页提示。
-  CourseSession? nextSessionAfter(DateTime from) {
-    final List<CourseSession> today = sessionsOn(from);
-    for (final CourseSession session in today) {
-      final PeriodTimeRange? range = _rangeOf(session, from);
-      if (range != null && range.end.isAfter(from)) {
-        return session;
-      }
-    }
-    return null;
-  }
-
   /// 课程在 [day] 当天的起止时刻，节次时间缺失时返回 null。
   PeriodTimeRange? rangeOf(CourseSession session, DateTime day) =>
       _rangeOf(session, day);
