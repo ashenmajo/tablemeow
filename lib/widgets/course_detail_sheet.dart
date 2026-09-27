@@ -9,10 +9,6 @@ import '../state/app_state.dart';
 import '../theme/course_palette.dart';
 import '../utils/date_format.dart';
 
-/// 显示课程详情（底部弹窗）。
-///
-/// 除了时间地点教师，还能给这门课单独指定颜色与别名，
-/// 按课程名保存，下次导入依然生效。
 Future<void> showCourseDetailSheet(
   BuildContext context, {
   required CourseSession session,
@@ -118,7 +114,6 @@ Future<void> showCourseDetailSheet(
   );
 }
 
-/// 这门课的颜色：只显示一行，点开后才让你挑。
 Widget _buildColorRow(
   BuildContext context,
   AppState state,
@@ -152,7 +147,6 @@ Widget _buildColorRow(
   );
 }
 
-/// 颜色选择弹窗：选一个颜色，或恢复成跟随主题色。
 Future<void> _pickColor(
   BuildContext context,
   AppState state,
@@ -174,13 +168,13 @@ Future<void> _pickColor(
               spacing: 10,
               runSpacing: 10,
               children: <Widget>[
-                for (final Color color
-                    in CoursePalette.swatchesFor(theme.colorScheme))
+                for (final Color color in CoursePalette.swatchesFor(
+                  theme.colorScheme,
+                ))
                   _ColorDot(
                     color: color,
                     selected: custom == color.toARGB32(),
-                    onTap: () =>
-                        Navigator.of(context).pop(color.toARGB32()),
+                    onTap: () => Navigator.of(context).pop(color.toARGB32()),
                   ),
               ],
             ),
@@ -209,10 +203,9 @@ Future<void> _pickColor(
   );
 }
 
-/// 用 `-1` 表示「恢复跟随主题色」。
+/// 用 `-1` 表示恢复跟随主题色。
 const int _resetColor = -1;
 
-/// 给这门课起一个别名（课表上显示别名）。
 Widget _buildAliasRow(
   BuildContext context,
   AppState state,
@@ -255,10 +248,6 @@ Future<void> _editAlias(
   await state.setCourseAlias(session.name, result);
 }
 
-/// 改名弹窗。
-///
-/// 输入框控制器由弹窗自己持有并销毁：如果在 `showDialog` 返回后立刻
-/// dispose，弹窗还在退场动画里挂着，会触发 `_dependents.isEmpty` 断言。
 class _AliasDialog extends StatefulWidget {
   const _AliasDialog({required this.initial});
 
@@ -333,7 +322,8 @@ class _ColorDot extends StatelessWidget {
             ? Icon(
                 Icons.check,
                 size: 16,
-                color: ThemeData.estimateBrightnessForColor(color) ==
+                color:
+                    ThemeData.estimateBrightnessForColor(color) ==
                         Brightness.dark
                     ? Colors.white
                     : Colors.black87,
@@ -372,15 +362,13 @@ class _InfoChip extends StatelessWidget {
             child: Icon(icon, size: 16, color: accent),
           ),
           const SizedBox(width: 6),
-          // 教室、教师这类字段可能很长，让它换行显示完整信息，
-          // 不要用省略号截断。
+          // 字段如果很长，就换行显示完整信息
           Flexible(
             child: Text(
               label,
               softWrap: true,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(color: accent),
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: accent),
             ),
           ),
         ],

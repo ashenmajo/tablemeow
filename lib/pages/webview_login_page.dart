@@ -36,16 +36,13 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
 
   Completer<JwxtBridgeResult>? _pending;
 
-  /// 当前这次请求的标识，用来忽略上一次请求迟到的回包。
   String _pendingToken = '';
   int _runSeq = 0;
 
   final List<String> _attemptErrors = <String>[];
 
-  /// 最近一次接口里读到的学年学期，用于失败时提示。
   String _scope = '';
 
-  /// 读取成功但结果可能不完整时的提醒。
   String _warning = '';
 
   double _progress = 0;
@@ -54,7 +51,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
   String? _error;
   bool _busy = false;
 
-  /// 当前平台是否提供 WebView 实现（桌面端与测试环境没有）。
   late final bool _supported = WebViewPlatform.instance != null;
 
   @override
@@ -68,7 +64,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
   }
 
   WebViewController _buildController() {
-    // 先声明再配置：导航回调里需要引用 controller 本身。
     final WebViewController controller = WebViewController();
     controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -112,7 +107,7 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
       }
       setState(() => _title = title.trim());
     } catch (_) {
-      // 取标题失败不影响使用，忽略。
+      // 读取标题失败
     }
   }
 
@@ -125,7 +120,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
       return;
     }
     if (result.token != _pendingToken) {
-      // 上一次请求迟到的回包，丢掉，避免串到这一次的结果上。
       return;
     }
     pending.complete(result);
@@ -231,7 +225,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
     );
   }
 
-  /// 先请求课表接口，读不到再退化为抓取当前页面的课表表格。
   Future<void> _fetchTimetable() async {
     if (_busy || _controller == null) {
       return;
@@ -285,7 +278,6 @@ class _WebViewLoginPageState extends State<WebViewLoginPage> {
     return '没有读取到课表$scope，请确认已登录并打开了课表查询页面';
   }
 
-  /// 把正方接口里的学期编号翻译成可读文本。
   static String _termLabel(String term) {
     switch (term) {
       case '3':
