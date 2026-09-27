@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/timetable_style.dart';
 import '../theme/course_palette.dart';
 
-/// 课表外观的四组设置，分别对应设置里的四个入口。
-///
-/// 每组只管自己的字段，改完立刻回调 [onChanged]。
-
-// ---------------------------------------------------------------------------
-// 布局与尺寸
-// ---------------------------------------------------------------------------
-
-/// 判断字号放不放得下时用的通用长课程名（不展示给用户）。
 const String _worstCaseName = '课程名称较长时的示例文本内容';
 
 enum _LayoutPreset { compact, balanced, spacious }
@@ -402,7 +393,6 @@ class _TimetableLayoutSectionState extends State<TimetableLayoutSection> {
       a.courseHorizontalPadding == b.courseHorizontalPadding &&
       a.courseVerticalPadding == b.courseVerticalPadding;
 
-  /// 当前行高下，字号缩放最大能到多少（再大课程名就会被截断）。
   double _maxFontScale(BuildContext context) {
     final double blockHeight = _blockHeight(context);
     final int detailWidgets =
@@ -425,7 +415,6 @@ class _TimetableLayoutSectionState extends State<TimetableLayoutSection> {
     return best.clamp(TimetableStyle.minFontScale, TimetableStyle.maxFontScale);
   }
 
-  /// 按两节课的格子估算：自动行高时扣掉标题栏、周次条与导航栏。
   double _blockHeight(BuildContext context) {
     final double cellHeight = _style.autoCellHeight
         ? MediaQuery.sizeOf(context).height - 220
@@ -455,10 +444,6 @@ class _TimetableLayoutSectionState extends State<TimetableLayoutSection> {
     return lines < 1 ? 1 : lines;
   }
 }
-
-// ---------------------------------------------------------------------------
-// 配色
-// ---------------------------------------------------------------------------
 
 class TimetableColorSection extends StatefulWidget {
   const TimetableColorSection({
@@ -698,10 +683,6 @@ class _TimetableDisplaySectionState extends State<TimetableDisplaySection> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// 主题
-// ---------------------------------------------------------------------------
-
 class TimetableThemeSection extends StatefulWidget {
   const TimetableThemeSection({
     super.key,
@@ -820,11 +801,6 @@ class _SeedDot extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// 通用控件
-// ---------------------------------------------------------------------------
-
-/// 一行「标题 + 当前值 + 滑块」。
 class StyleSlider extends StatelessWidget {
   const StyleSlider({
     super.key,
@@ -865,7 +841,6 @@ class StyleSlider extends StatelessWidget {
   }
 }
 
-/// 一行「标题 + 若干可选项」。
 class StyleChoiceRow<T> extends StatelessWidget {
   const StyleChoiceRow({
     super.key,

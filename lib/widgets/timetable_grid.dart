@@ -350,8 +350,7 @@ class _CourseBlock extends StatelessWidget {
     final bool wantTeacher = style.showTeacher && session.teacher.isNotEmpty;
     final List<String> parts = _locationParts(session.location);
 
-    // 用 strut 把行高钉死：中文字形会走系统回退字体，回退字体的
-    // 行高比字号大不少，不锁死就会撑破格子（真机上出现 overflow 黄条）。
+    // 用 strut 把行高钉死，不锁死会撑破格子出现overflow黄条
     final StrutStyle nameStrut = StrutStyle(
       fontSize: style.fontSize,
       height: style.lineHeightFactor,
@@ -408,8 +407,6 @@ class _CourseBlock extends StatelessWidget {
                       TimetableStyle.maxTeacherLines,
                     )
                   : 0;
-              // 楼名与房间号分得开、又放得下两行时用 Wrap，让它们
-              // 在两者之间换行（房间号永远不会被拆开）。
               final bool splitLocation =
                   style.splitLocation &&
                   parts.length > 1 &&
@@ -475,10 +472,6 @@ class _CourseBlock extends StatelessWidget {
       ),
     );
   }
-
-  /// 把教室拆成「楼名」「房间号」两段，便于在两者之间换行。
-  ///
-  /// `百全-103` → `['百全', '-103']`；`公共机房四` 这类没有房间号的整段返回。
   static List<String> _locationParts(String value) {
     final String text = value.trim();
     if (text.isEmpty) {

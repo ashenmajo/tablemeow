@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'period_time.dart';
 
-/// 学期设置：起始周、总周数、节次时间与显示偏好。
 @immutable
 class Semester {
   const Semester({
@@ -10,16 +9,12 @@ class Semester {
     this.totalWeeks = 20,
     this.periods = defaultPeriods,
   });
-
-  /// 第 1 周的周一，课表所有日期都由它推算。
   final DateTime startDate;
 
   final int totalWeeks;
 
-  /// 每节课的时间安排，按节次升序。
   final List<PeriodTime> periods;
 
-  /// 星期一至星期日的中文名，下标 0 对应周一。
   static const List<String> weekdayNames = <String>[
     '周一',
     '周二',
@@ -30,7 +25,7 @@ class Semester {
     '周日',
   ];
 
-  /// 默认节次时间，可在设置页逐节调整。
+
   static const List<PeriodTime> defaultPeriods = <PeriodTime>[
     PeriodTime(index: 1, start: '08:00', end: '08:45'),
     PeriodTime(index: 2, start: '08:55', end: '09:40'),
@@ -46,9 +41,6 @@ class Semester {
     PeriodTime(index: 12, start: '21:45', end: '22:30'),
   ];
 
-  /// 自动重排节次时间：给出上午 / 下午 / 晚上的开始时间、每节时长与课间休息，
-  /// 现有节次按当前开始时间分成三段（<12:00、12:00–18:00、≥18:00），
-  /// 各段节数不变，只重算起止时间。
   static List<PeriodTime> autoPeriods(
     List<PeriodTime> periods, {
     required int morningStart,
@@ -82,27 +74,22 @@ class Semester {
     return result;
   }
 
-  /// 以 [today] 所在周的周一作为第 1 周，生成一份默认学期设置。
   factory Semester.defaults({DateTime? today}) {
     return Semester(startDate: mondayOf(today ?? DateTime.now()));
   }
 
-  /// 取 [date] 所在周的周一（零点）。
   static DateTime mondayOf(DateTime date) {
     final DateTime day = DateTime(date.year, date.month, date.day);
     return day.subtract(Duration(days: day.weekday - 1));
   }
 
-  /// 星期名称（1 表示周一）。
-  String weekdayName(int weekday) => weekdayNames[(weekday - 1).clamp(0, 6)];
+  String weekdayName(int weekday) => weekdayNames[(weekday - 1)];
 
   DateTime weekStart(int week) => startDate.add(Duration(days: (week - 1) * 7));
 
-  /// 第 [week] 周星期 [weekday] 对应的日期。
   DateTime dateOf(int week, int weekday) =>
       weekStart(week).add(Duration(days: weekday - 1));
 
-  /// [date] 属于第几周，可能小于 1（学期开始前）或大于 [totalWeeks]。
   int weekOfDate(DateTime date) {
     final DateTime day = DateTime(date.year, date.month, date.day);
     return day.difference(startDate).inDays ~/ 7 + 1;
@@ -113,7 +100,6 @@ class Semester {
     return week >= 1 && week <= totalWeeks;
   }
 
-  /// 按节次序号取时间安排，序号不存在时返回 null。
   PeriodTime? periodAt(int index) {
     for (final PeriodTime period in periods) {
       if (period.index == index) {

@@ -1,38 +1,20 @@
 import 'dart:convert';
 
-/// 在 WebView 里执行、用来读取课表的脚本。
-///
-/// 脚本一律通过 [bridgeChannel] 把结果（JSON 字符串）回传给宿主，
-/// 这样既能用异步请求，也不依赖脚本的返回值。
-/// 每个回包都会带上调用方传入的 `token`，宿主据此丢弃迟到的旧结果。
 abstract final class JwxtWebScripts {
-  /// JS 与宿主之间的通道名。
+
   static const String bridgeChannel = 'TableMeowBridge';
 
-  /// 脚本执行结果的状态字段取值。
   static const String statusOk = 'ok';
   static const String statusError = 'error';
-
-  /// 数据来源：教务系统接口 / 当前页面已渲染的表格。
   static const String sourceApi = 'api';
   static const String sourceDocument = 'document';
 
-  /// 读取课表：优先请求教务系统接口。
-  ///
-  /// 登录态来自 WebView 自身的 Cookie（含 VPN / SSO 跳转后的会话），
-  /// 学年学期直接取当前页面上选中的那一组；页面上取不到时脚本会报错返回。
-  ///
-  /// [token] 会原样回传，用来区分不同次请求的回包。
   static String fetchTimetable({String token = ''}) {
     return _fetchTimetableTemplate
         .replaceAll('__CHANNEL__', bridgeChannel)
         .replaceAll('__TOKEN__', jsonEncode(token));
   }
 
-  /// 抓取当前页面已经渲染出来的课表表格（接口读不到时的兜底）。
-  ///
-  /// 页面上的「周次」下拉框若不是「全部」，会顺带请求一次全部周次的结果，
-  /// 避免只把当前这一周的课导进来。
   static String scrapeDocument({String token = ''}) =>
       _scrapeDocumentTemplate
           .replaceAll('__CHANNEL__', bridgeChannel)
@@ -126,11 +108,6 @@ abstract final class JwxtWebScripts {
 })()
 ''';
 
-  /// 表格抓取：
-  ///
-  /// 1. 在页面（含同源 iframe）里挑最像课表的表格，按 rowspan/colspan 取课程；
-  /// 2. 页面上的「周次」下拉框若不是「全部」，再请求一次全部周次的结果，
-  ///    取课程更多的那一份，避免漏掉当前周没开课的课程。
   static const String _scrapeDocumentTemplate = r'''
 (function () {
   var post = function (payload) {
@@ -155,12 +132,6 @@ abstract final class JwxtWebScripts {
     walk(root, 0);
     return documents;
   };
-  // 逐个子节点拼文本，并在元素之间补一个换行。
-  //
-  // 强智等系统把课程名 / 教师 / 职称 / 周次 / 节次 / 教室各自装在一个
-  // 元素里，元素之间却没有任何分隔符（换行是 CSS 排出来的），
-  // 直接取 innerText 会得到「电磁场与电磁波侯周国副教授2-11(周)…」
-  // 这样一整串，教师和教室就分不出来了。
   var rawTextOf = function (node) {
     var children = (node && node.childNodes) ? node.childNodes : null;
     if (!children || !children.length) {
@@ -191,11 +162,7 @@ abstract final class JwxtWebScripts {
       .replace(/[ \t]+/g, ' ')
       .replace(/\n\s*\n+/g, '\n')
       .trim();
-  };
-  // 强智等系统把教师 / 教室 / 周次节次放在带 title 的子元素里，
-  // 这里把带 title 的字段单独取出来交给宿主。
-  // 只取最内层的带 title 元素：外层容器一旦也带 title，
-  // 它的内容就是整格文字，会把课程名和别的字段一起吞进去。
+  };。
   var innerLabeled = function (root) {
     var all = root.querySelectorAll('[title]');
     var result = [];
@@ -247,10 +214,7 @@ abstract final class JwxtWebScripts {
     var ones = parts[1] ? (cnDigits[parts[1]] || 0) : 0;
     return tens * 10 + ones;
   };
-  // 行首那一格可能是「第一节」「第一大节(01,02小节)」「上午1-2节」「1」
-  // 「08:00-08:45」。强智按「大节」排，一个格子里写着两小节，例如
-  // 「第三大节(05,06小节)」对应第 5-6 节，要取小节的起始号。
-  // 时间是作息时间不是节次，识别不出时交给行号兜底。
+
   var periodOf = function (text) {
     var t = (text || '').replace(/\s/g, '');
     if (!t) { return 0; }
@@ -266,8 +230,7 @@ abstract final class JwxtWebScripts {
     m = t.match(/^(\d{1,2})(?!\d)/);
     return m ? parseInt(m[1], 10) : 0;
   };
-  // 课表下面的「备注」行放的是没有排时间的课（例如课程设计），
-  // 它横跨所有星期列，不该当成某一节来上。
+
   var isRemark = function (text) {
     var t = (text || '').replace(/\s/g, '');
     return t.indexOf('备注') === 0 || t.indexOf('说明') === 0 || t.indexOf('注:') === 0 || t.indexOf('注：') === 0;
@@ -277,10 +240,6 @@ abstract final class JwxtWebScripts {
     var t = (text || '').replace(/\s/g, '');
     return t.indexOf('周') >= 0 || t.indexOf('节') >= 0;
   };
-  // 各家的课表表格 id 都不一样（正方是 #kbtable，强智没有固定 id），
-  // 所以不认 id：先要求表头有两列以上星期，再数一数「星期列里写了周次或
-  // 节次的格子」。真正排进课表的课才有这些信息，而网课清单之类的表格
-  // 只有课程名，靠这一点把它们区分开。
   var timetableScore = function (table) {
     var rows = table.querySelectorAll('tr');
     if (!rows || rows.length < 2) { return 0; }
@@ -348,8 +307,6 @@ abstract final class JwxtWebScripts {
       };
     }
     var rows = table.querySelectorAll('tr');
-    // 表头行在前几行里挑「星期单元格最多」的一行，
-    // 避免把某个课程名里带「周一」的数据行当成表头。
     var headerRow = -1;
     var headerMap = null;
     var bestCount = 0;
@@ -434,11 +391,7 @@ abstract final class JwxtWebScripts {
     }
     return {status: 'ok', source: 'document', courses: courses};
   };
-  // 页面上的「周次」下拉框：如果它只筛了某一周，就拼一次表单请求去取
-  // 「全部」周次的结果，避免漏掉当前周没开课的课程。
-  //
-  // 返回 null 表示没有周次过滤（或已经是全部）；
-  // 返回 {warning} 表示过滤了但没法自动补齐。
+
   var weekFilterOf = function (documents) {
     for (var d = 0; d < documents.length; d++) {
       var selects = documents[d].querySelectorAll('select');
@@ -460,7 +413,6 @@ abstract final class JwxtWebScripts {
             otherLike++;
           }
         }
-        // 只认「看起来是周次」的下拉框，别把学期、节次模式之类的选错。
         if (weekLike < 2 || otherLike > weekLike) { continue; }
         var selected = el.options[el.selectedIndex];
         var label = selected

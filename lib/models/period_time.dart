@@ -10,18 +10,13 @@ class PeriodTime {
     required this.end,
   });
 
-  /// 节次序号，从 1 开始。
   final int index;
 
-  /// 开始时间，形如 `08:00`。
   final String start;
 
-  /// 结束时间，形如 `08:45`。
   final String end;
 
   String get label => '第 $index 节';
-
-  /// `08:20` → 500（从零点开始的分钟数）。
   static int minuteOf(String hhmm) {
     final List<String> parts = hhmm.split(':');
     final int hour = int.tryParse(parts.first) ?? 0;
@@ -29,7 +24,6 @@ class PeriodTime {
     return hour * 60 + minute;
   }
 
-  /// 500 → `08:20`（超过一天按取模算）。
   static String clockOf(int minute) {
     final int wrapped = minute % (24 * 60);
     final int hour = wrapped ~/ 60;
@@ -37,7 +31,6 @@ class PeriodTime {
     return '${_twoDigits(hour)}:${_twoDigits(rest)}';
   }
 
-  /// 这节课属于上午 / 下午 / 晚上（按开始时间划分）。
   PeriodSession get session {
     final int minute = minuteOf(start);
     if (minute < 12 * 60) {
@@ -51,8 +44,6 @@ class PeriodTime {
 
   static String _twoDigits(int value) =>
       value < 10 ? '0$value' : '$value';
-
-  /// 当天该节次的开始时刻，用于时间线、倒计时等比较。
   DateTime startAt(DateTime day) => _at(day, start);
 
   DateTime endAt(DateTime day) => _at(day, end);

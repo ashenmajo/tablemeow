@@ -1,6 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 记录上次使用的教务 / VPN 登录地址，避免每次重新输入。
 abstract interface class JwxtLoginStore {
   Future<String?> readLoginUrl();
 

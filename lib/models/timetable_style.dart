@@ -7,27 +7,14 @@ enum CourseLineHeight { compact, standard, relaxed }
 
 enum CourseTextAlignment { left, center }
 
-enum CourseColorMode {
-  /// 跟随主题色：用主题配色里的容器色，天然与主色协调（默认）。
-  theme,
+enum CourseColorMode { theme, custom, single }
 
-  /// 自定义色板：在下面选的色板里按课程名取色。
-  custom,
-
-  /// 全部课程用同一个颜色。
-  single,
-}
-
-/// 内置色板（自定义配色方案时使用）。
 enum CoursePaletteKind { material, macaron, morandi, contrast }
 
-/// 课程块上的文字颜色。
 enum CourseTextColor { auto, dark, light }
 
-/// 课程名显示方式。
 enum CourseNameStyle { full, alias }
 
-/// 课表外观设置：格子布局、配色、信息显示与主题。
 @immutable
 class TimetableStyle {
   const TimetableStyle({
@@ -65,27 +52,17 @@ class TimetableStyle {
     this.oledBlack = false,
   });
 
-  /// 主题主色（种子色）。整套 Material 3 配色由它推导，
-  /// 课表里「跟随主题色」的课程块也用它。
   final int seedColorValue;
 
   Color get seedColor => Color(seedColorValue);
 
-  // ---- 格子与布局 ----
-
-  /// 每天一列的最小宽度；放不下时课表横向滚动。
   final double dayWidth;
-
-  /// 每节课的行高；`0` 表示自动撑满可视区域。
   final double cellHeight;
 
-  /// 字号缩放倍数（0.8–1.5）。
   final double fontScale;
 
-  /// 行距档位。
   final CourseLineHeight lineHeight;
 
-  /// 星期表头、节次列和课程块的细节尺寸。
   final double headerHeight;
   final double periodColumnWidth;
   final double courseBlockGap;
@@ -94,62 +71,41 @@ class TimetableStyle {
   final double courseVerticalPadding;
   final CourseTextAlignment courseTextAlignment;
 
-  /// 是否显示周六周日。
   final bool showWeekend;
 
-  /// 是否显示左侧节次（时间）列。
   final bool showPeriodColumn;
 
-  /// 是否显示顶部周次条。
   final bool showWeekSelector;
 
-  /// 是否显示网格线。
   final bool showGrid;
 
   final bool showHeaderDate;
   final bool showPeriodEndTime;
   final bool highlightToday;
   final bool showCurrentTime;
-
-  // ---- 颜色 ----
-
   final CourseColorMode colorMode;
   final CoursePaletteKind palette;
   final CourseTextColor textColor;
 
-  /// 单课自定义颜色：课程名 → ARGB。
   final Map<String, int> courseColors;
 
-  /// 课程别名：原名 → 想显示的名字。
   final Map<String, String> courseAliases;
-
-  // ---- 信息显示 ----
 
   final bool showLocation;
   final bool showTeacher;
 
-  /// 是否去掉教师名后面的职称（`刘湛讲师（高校）` → `刘湛`）。
   final bool stripTeacherTitle;
 
-  /// 是否把地点拆成「楼名 + 房间号」两行，避免房间号被拆开。
   final bool splitLocation;
 
   final CourseNameStyle nameStyle;
 
-  // ---- 主题 ----
-
   final AppThemeMode themeMode;
   final bool oledBlack;
 
-  // ---- 常量与派生值 ----
-
-  /// 字号基准值，实际字号 = 基准 × [fontScale]。
   static const double baseFontSize = 12.5;
-
-  /// 默认主色：靛蓝。
   static const int defaultSeedColor = 0xFF3F51B5;
 
-  /// 可选主色（Material 调色板的常见色相），用户选一个，整套配色从它推导。
   static const List<int> seedChoices = <int>[
     0xFF3F51B5, // 靛蓝
     0xFF1565C0, // 蓝
@@ -231,7 +187,6 @@ class TimetableStyle {
 
   int get weekdayCount => showWeekend ? 7 : 5;
 
-  /// 课程块上显示的名字（配了别名且选了别名模式时用别名）。
   String nameFor(String courseName) {
     if (nameStyle != CourseNameStyle.alias) {
       return courseName;
@@ -240,13 +195,9 @@ class TimetableStyle {
     return alias == null || alias.trim().isEmpty ? courseName : alias.trim();
   }
 
-  /// 教师显示文本：按设置决定要不要去掉职称后缀。
   String teacherFor(String teacher) =>
       stripTeacherTitle ? stripTeacherTitleOf(teacher) : teacher;
 
-  /// 给定课程块高度与副信息行数，算出课程名与副信息各能放几行。
-  ///
-  /// 两者加起来不会超过块高，所以不会溢出。
   ({int nameLines, int detailLines}) lineBudget(
     double blockHeight, {
     required int detailWidgets,
@@ -343,7 +294,6 @@ class TimetableStyle {
     );
   }
 
-  /// 给某门课指定（或清除）颜色与别名。
   TimetableStyle withCourseColor(String courseName, int? argb) {
     final Map<String, int> next = Map<String, int>.of(courseColors);
     if (argb == null) {
@@ -575,10 +525,6 @@ class TimetableStyle {
   ]);
 }
 
-/// 教师名后面的职称与括注（`刘湛讲师（高校）` → `刘湛`）。
-///
-/// 放在这里是为了让「是否去掉职称」这个开关在渲染时才生效，
-/// 导入时保留原始文本。
 String stripTeacherTitleOf(String value) {
   String text = value.trim();
   if (text.isEmpty) {

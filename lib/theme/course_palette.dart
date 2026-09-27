@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/timetable_style.dart';
 
 /// 课程块配色。
-///
-/// 默认「跟随主题色」：直接取主题配色里的容器色，天然与主色协调，
-/// 也符合 Material 3 的色调规范；换主色时整张课表跟着变。
-/// 单门课单独指定的颜色优先级最高。
 abstract final class CoursePalette {
-  /// 内置色板，仅在「自定义色板」模式下使用。
   static const Map<CoursePaletteKind, List<Color>> palettes =
       <CoursePaletteKind, List<Color>>{
         CoursePaletteKind.material: <Color>[
@@ -45,10 +40,6 @@ abstract final class CoursePalette {
         ],
       };
 
-  /// 「跟随主题色」用的容器色：都由主色推导，互相之间是协调的。
-  ///
-  /// 容器的明度随亮暗模式自动切换，格子上再叠加自动对比的文字色，
-  /// 亮暗两种模式下都能读。
   static List<Color> themeColors(ColorScheme scheme) => <Color>[
     scheme.primaryContainer,
     scheme.secondaryContainer,
@@ -60,10 +51,8 @@ abstract final class CoursePalette {
     scheme.primaryFixed,
   ];
 
-  /// 单色模式下用的颜色（跟着主题走）。
   static Color singleColor(ColorScheme scheme) => scheme.secondaryContainer;
 
-  /// 详情页里可以直接点选的颜色，用来给某门课单独指定。
   static List<Color> swatchesFor(ColorScheme scheme) => <Color>[
     ...themeColors(scheme),
     ...palettes[CoursePaletteKind.material]!,

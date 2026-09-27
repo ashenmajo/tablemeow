@@ -5,7 +5,6 @@ import 'period_time.dart';
 import 'semester.dart';
 import 'timetable_style.dart';
 
-//一份完整的课表：学期设置 + 外观设置 + 全部上课安排。
 @immutable
 class Timetable {
   const Timetable({
@@ -14,14 +13,12 @@ class Timetable {
     this.style = TimetableStyle.defaults,
   });
 
-  // 空课表：以 [today] 所在周为第 1 周。
   factory Timetable.empty({DateTime? today}) =>
       Timetable(semester: Semester.defaults(today: today));
 
   final Semester semester;
   final List<CourseSession> sessions;
 
-  //课表外观（格子尺寸、字号、网格线），长按课表可改。
   final TimetableStyle style;
 
   bool get isEmpty => sessions.isEmpty;
@@ -49,10 +46,9 @@ class Timetable {
       sessions.map((CourseSession session) => session.name).toSet().toList()
         ..sort();
 
-  /// 课程门数
+
   int get courseCount => courseNames.length;
 
-  /// 第 [week] 周星期 [weekday] 的课程，按节次排序
   List<CourseSession> sessionsAt({required int week, required int weekday}) {
     return sessions
         .where(
@@ -73,7 +69,6 @@ class Timetable {
       ..sort(_byPeriod);
   }
 
-  /// 课程在 [day] 当天的起止时刻，节次时间缺失时返回 null。
   PeriodTimeRange? rangeOf(CourseSession session, DateTime day) =>
       _rangeOf(session, day);
 

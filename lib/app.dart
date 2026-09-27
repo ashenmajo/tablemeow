@@ -16,11 +16,7 @@ import 'theme/app_theme.dart';
 
 class TableMeowApp extends StatefulWidget {
   const TableMeowApp({super.key, this.storage, this.clock});
-
-  /// 课表存储，默认走 shared_preferences。
   final TimetableStorage? storage;
-
-  /// 时间来源，测试可以注入固定时间。
   final DateTime Function()? clock;
 
   @override

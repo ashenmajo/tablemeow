@@ -2,9 +2,6 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 课表持久化接口。
-///
-/// 生产环境使用 [SharedPreferencesTimetableStorage]。
 abstract interface class TimetableStorage {
   Future<Map<String, dynamic>?> readJson();
 
@@ -13,7 +10,6 @@ abstract interface class TimetableStorage {
   Future<void> clear();
 }
 
-/// 基于 shared_preferences 的课表存储。
 class SharedPreferencesTimetableStorage implements TimetableStorage {
   static const String storageKey = 'tablemeow.timetable.v1';
 

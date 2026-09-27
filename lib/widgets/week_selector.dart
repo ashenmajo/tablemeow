@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/semester.dart';
 import '../utils/date_format.dart';
 
-/// 课表顶部的周次选择条：左右切换、点按选择、一键回本周。
 class WeekSelector extends StatelessWidget {
   const WeekSelector({
     super.key,
@@ -18,7 +17,6 @@ class WeekSelector extends StatelessWidget {
   final Semester semester;
   final int week;
 
-  /// 今天所在的周次，可能与 [semester] 的周次范围不一致。
   final int currentWeek;
 
   final ValueChanged<int> onWeekSelected;

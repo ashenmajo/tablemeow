@@ -2,37 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../models/timetable_style.dart';
 
-/// 应用的 Material 3 Expressive 主题。
-///
-/// 界面层只使用 [AppTheme.light] 与 [AppTheme.dark]，
-/// 配色由种子色推导；组件风格（大圆角、tonal 按钮、导航栏指示器）
-/// 走 Material 3 Expressive 的写法。
 abstract final class AppTheme {
-  /// 种子色：靛蓝。导航栏、按钮、卡片、输入框都从这一套配色推导。
-  ///
-  /// 这里用 [DynamicSchemeVariant.tonalSpot]（Material 3 基线算法），
-  /// 它能保住种子色的色相；`expressive` 变体会把色相转到绿色去。
-  /// 换种子色前建议先跑一遍 `flutter test --update-goldens` 看实际效果。
+
   static const Color defaultSeed = Color(TimetableStyle.defaultSeedColor);
 
-  /// 卡片、弹窗等大圆角，体现 Expressive 的形状风格。
   static const double _largeRadius = 20;
 
   static ThemeData light({Color seedColor = defaultSeed}) =>
       _build(Brightness.light, seed: seedColor);
 
-  /// [oled] 为真时走纯黑背景，适合 OLED 屏。
   static ThemeData dark({bool oled = false, Color seedColor = defaultSeed}) =>
       _build(Brightness.dark, seed: seedColor, oled: oled);
 
-  /// 把设置里的主题模式映射成 Flutter 的 [ThemeMode]。
   static ThemeMode modeOf(AppThemeMode mode) => switch (mode) {
     AppThemeMode.light => ThemeMode.light,
     AppThemeMode.dark => ThemeMode.dark,
     AppThemeMode.system => ThemeMode.system,
   };
-
-  /// 纯黑模式：背景全黑，容器用极深的灰分层。
   static ColorScheme _blackedIf(ColorScheme base, bool oled) {
     if (!oled) {
       return base;

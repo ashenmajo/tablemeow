@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 内容页统一骨架：说明文字 + 限宽、可滚动的区块列表。
+/// 内容页骨架
 class PageScaffold extends StatelessWidget {
   const PageScaffold({
     super.key,
@@ -10,7 +10,6 @@ class PageScaffold extends StatelessWidget {
     this.controller,
   });
 
-  /// 页面顶部的一句说明，省略时不占位。
   final String? description;
   final List<Widget> children;
   final EdgeInsets padding;
@@ -53,7 +52,6 @@ class PageScaffold extends StatelessWidget {
     );
   }
 
-  /// 在相邻区块之间插入统一间距。
   List<Widget> _spaced(List<Widget> children) {
     return <Widget>[
       for (int index = 0; index < children.length; index++) ...<Widget>[

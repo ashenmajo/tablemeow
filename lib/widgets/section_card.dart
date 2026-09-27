@@ -12,7 +12,6 @@ class SectionCard extends StatelessWidget {
 
   final String? title;
 
-  /// 标题前的图标，用来区分同一页里的分组。
   final IconData? icon;
   final String? subtitle;
   final Widget? trailing;

@@ -1,8 +1,5 @@
 import '../models/course_session.dart';
 
-/// 内置示例课表：界面预览与测试用的固定数据。
-///
-/// 周次覆盖第 1-18 周，其中包含单双周与周六的课程。
 List<CourseSession> demoCourseSessions() {
   final List<int> allWeeks = _weeks(1, 18);
   final List<int> oddWeeks = _weeks(1, 18, step: 2);
@@ -138,7 +135,6 @@ List<CourseSession> demoCourseSessions() {
   ];
 }
 
-/// 生成 [from] 到 [to]（含）的周次列表，[step] 为步长。
 List<int> _weeks(int from, int to, {int step = 1}) {
   return <int>[for (int week = from; week <= to; week += step) week];
 }

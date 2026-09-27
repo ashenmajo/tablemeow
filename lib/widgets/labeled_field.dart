@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// 带独立标题的输入框：标题固定显示在输入框上方，而不是浮在框内和内容挤在一起。
-///
-/// 用法是把 [TextField] 的 `labelText` 换成 `hintText`，再交给这个组件包一层。
 class LabeledField extends StatelessWidget {
   const LabeledField({
     super.key,
@@ -11,12 +8,10 @@ class LabeledField extends StatelessWidget {
     this.helper,
   });
 
-  /// 输入框上方的标题。
   final String label;
 
   final Widget child;
 
-  /// 输入框下方的补充说明，可省略。
   final String? helper;
 
   static const EdgeInsets _labelPadding = EdgeInsets.only(left: 4, bottom: 6);

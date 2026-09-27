@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-/// 一次上课安排：某门课在「星期几的第几节到第几节、哪些周」上课。
-///
-/// 课表数据以 [CourseSession] 列表的形式保存，同一门课一周上多次时
-/// 会有多条记录。
+/// 一次上课安排：某门课在星期几的第几节到第几节、哪些周上课。
+
 @immutable
 class CourseSession {
   const CourseSession({
@@ -18,22 +16,16 @@ class CourseSession {
 
   final String name;
 
-  /// 星期几：1 表示周一，7 表示周日。
   final int weekday;
 
-  /// 起始节次，从 1 开始。
   final int startPeriod;
 
-  /// 结束节次，等于 [startPeriod] 时表示单节连堂。
   final int endPeriod;
 
-  /// 上课周次，例如 `[1, 2, 3, ...]` 或 `[1, 3, 5]`。
   final List<int> weeks;
 
-  /// 任课教师，可能为空。
   final String teacher;
 
-  /// 上课地点，可能为空。
   final String location;
 
   int get periodCount => endPeriod - startPeriod + 1;
@@ -43,7 +35,6 @@ class CourseSession {
   String get periodLabel =>
       startPeriod == endPeriod ? '$startPeriod 节' : '$startPeriod-$endPeriod 节';
 
-  /// 周次的可读文本，例如 `1-16周`、`1-16周(单)`、`1,3,5-9周`。
   String get weeksLabel => formatWeeks(weeks);
 
   CourseSession copyWith({
@@ -92,7 +83,6 @@ class CourseSession {
     );
   }
 
-  /// 把一组周次压缩成便于阅读的文本。
   static String formatWeeks(List<int> weeks) {
     final List<int> sorted = weeks.toSet().toList()..sort();
     if (sorted.isEmpty) {

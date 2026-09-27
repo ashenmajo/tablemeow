@@ -30,14 +30,14 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _state = AppScope.of(context);
-    // 每分钟刷新一次「现在」，驱动课表时间线与今日课程状态。
+    // 每分钟刷新一次现在,驱动课表时间线与今日课程状态
     _minuteTicker ??= Timer.periodic(
       const Duration(minutes: 1),
       (Timer _) => _state?.refresh(),
     );
   }
 
-  /// 从后台回到前台时：时间可能已经过去很久，跳回本周并刷新。
+  /// 从后台回到前台时时间可能已经过去很久，跳回本周并刷新
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
