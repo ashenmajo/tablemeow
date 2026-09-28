@@ -162,7 +162,7 @@ abstract final class JwxtWebScripts {
       .replace(/[ \t]+/g, ' ')
       .replace(/\n\s*\n+/g, '\n')
       .trim();
-  };。
+  };
   var innerLabeled = function (root) {
     var all = root.querySelectorAll('[title]');
     var result = [];
