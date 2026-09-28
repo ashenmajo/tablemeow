@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import '../../models/course_session.dart';
 
-
 class JwxtCourseParser {
   const JwxtCourseParser({this.totalWeeks = 20});
 
@@ -77,12 +76,7 @@ class JwxtCourseParser {
     }
 
     (int, int)? periods;
-    for (final String key in const <String>[
-      'jcor',
-      'jcs',
-      'jcs2',
-      'periods',
-    ]) {
+    for (final String key in const <String>['jcor', 'jcs', 'jcs2', 'periods']) {
       periods = parsePeriods(_text(item, <String>[key]));
       if (periods != null) {
         break;
@@ -122,54 +116,46 @@ class JwxtCourseParser {
       if (item is! Map) {
         continue;
       }
-      final CourseSession? session = parseScrapedItem(
-        item.cast<String, dynamic>(),
-      );
-      if (session != null) {
-        sessions.add(session);
-      }
+      sessions.addAll(parseScrapedItem(item.cast<String, dynamic>()));
     }
     return sessions;
   }
 
-  CourseSession? parseScrapedItem(Map<String, dynamic> item) {
+  /// 强智会把同一门课在同一格里按周次段拆成多条（如「2-5周」「6-9周」「10-13周」），
+  /// 这里逐段展开成多条课；星期、节次、教师、教室都相同的段落再合并回一条。
+  List<CourseSession> parseScrapedItem(Map<String, dynamic> item) {
     final int? weekday = (item['weekday'] as num?)?.toInt();
     final int? period = (item['period'] as num?)?.toInt();
     if (weekday == null || weekday < 1 || weekday > 7) {
-      return null;
+      return const <CourseSession>[];
     }
     if (period == null || period < 1) {
-      return null;
+      return const <CourseSession>[];
     }
     final int span = ((item['span'] as num?)?.toInt() ?? 1).clamp(1, 20);
     final String raw = item['text']?.toString() ?? '';
     // 课表下面的备注行放的是没排时间的课，不该出现在课表格子里。
     if (RegExp(r'^\s*(备注|说明|注)\s*[:：]').hasMatch(raw)) {
-      return null;
+      return const <CourseSession>[];
     }
 
     final String normalized = _normalizeWeekMarkers(raw);
-    final RegExpMatch? weeksMatch = _weeksToken.firstMatch(normalized);
-    final List<int> weeks = weeksMatch == null
-        ? const <int>[]
-        : parseWeeks(weeksMatch.group(0)!, totalWeeks: totalWeeks);
-    final String withoutWeeks = weeksMatch == null
-        ? normalized
-        : normalized.replaceRange(weeksMatch.start, weeksMatch.end, ' ');
-
-    final RegExpMatch? periodMatch = _periodToken.firstMatch(withoutWeeks);
-
-    if (weeksMatch == null && periodMatch == null) {
-      return null;
-    }
-    final (int, int)? scrapedPeriods = periodMatch == null
+    final List<RegExpMatch> weeksMatches = _weeksToken
+        .allMatches(normalized)
+        .toList();
+    final RegExpMatch? firstWeeks = weeksMatches.isEmpty
         ? null
-        : parsePeriods(
-            periodMatch.group(0)!.replaceAll(
-              RegExp(r'[\[\]【】()（）节]'),
-              '',
-            ),
-          );
+        : weeksMatches.first;
+    final RegExpMatch? firstPeriod = _periodToken.firstMatch(normalized);
+
+    if (firstWeeks == null && firstPeriod == null) {
+      return const <CourseSession>[];
+    }
+    // 课程名、教师、教室在各段里重复出现，裁掉第一段的周次与节次后统一解析。
+    final String withoutWeeks = firstWeeks == null
+        ? normalized
+        : normalized.replaceRange(firstWeeks.start, firstWeeks.end, ' ');
+    final RegExpMatch? periodMatch = _periodToken.firstMatch(withoutWeeks);
     final String body = periodMatch == null
         ? withoutWeeks
         : withoutWeeks.replaceRange(periodMatch.start, periodMatch.end, ' ');
@@ -188,7 +174,7 @@ class JwxtCourseParser {
           .toList();
     }
     if (segments.isEmpty) {
-      return null;
+      return const <CourseSession>[];
     }
 
     final List<(String, String)> parts = _labeledParts(item['parts']);
@@ -200,9 +186,7 @@ class JwxtCourseParser {
       if (value.length > 40) {
         continue;
       }
-      if (key.contains('老师') ||
-          key.contains('教师') ||
-          key.contains('授课')) {
+      if (key.contains('老师') || key.contains('教师') || key.contains('授课')) {
         if (!_looksLikeTeacherTitle(value)) {
           labeledTeacher ??= value;
         }
@@ -243,18 +227,248 @@ class JwxtCourseParser {
           ? fromLabeled
           : fromSegments;
     }
-    final int startPeriod = scrapedPeriods?.$1 ?? period;
-    final int endPeriod = scrapedPeriods?.$2 ?? period + span - 1;
-    return CourseSession(
-      name: name,
-      weekday: weekday,
-      startPeriod: startPeriod,
-      endPeriod: endPeriod < startPeriod ? startPeriod : endPeriod,
-      weeks: weeks.isEmpty ? _allWeeks() : weeks,
-      teacher: _stripTeacherTitle(labeledTeacher ?? teacher),
-      location: labeledLocation ?? location,
-    );
+    // 没有周次段的格子：整学期都上，节次取格子里第一个节次段或所在行。
+    if (weeksMatches.isEmpty) {
+      final (int, int)? scrapedPeriods = firstPeriod == null
+          ? null
+          : parsePeriods(
+              firstPeriod.group(0)!.replaceAll(RegExp(r'[\[\]【】()（）节]'), ''),
+            );
+      final int startPeriod = scrapedPeriods?.$1 ?? period;
+      final int endPeriod = scrapedPeriods?.$2 ?? period + span - 1;
+      return <CourseSession>[
+        CourseSession(
+          name: name,
+          weekday: weekday,
+          startPeriod: startPeriod,
+          endPeriod: endPeriod < startPeriod ? startPeriod : endPeriod,
+          weeks: _allWeeks(),
+          teacher: _stripTeacherTitle(labeledTeacher ?? teacher),
+          location: labeledLocation ?? location,
+        ),
+      ];
+    }
+
+    // 每个周次段配一个节次段：在该段到下一段之间的窗口里找还没被认领的节次，
+    // 配不上的回退用所在行的节次。
+    final List<RegExpMatch> periodMatches = _periodToken
+        .allMatches(normalized)
+        .toList();
+    final List<RegExpMatch> claimed = <RegExpMatch>[];
+    final List<CourseSession> sessions = <CourseSession>[];
+    for (int i = 0; i < weeksMatches.length; i++) {
+      final RegExpMatch weeksMatch = weeksMatches[i];
+      final List<int> weeks = parseWeeks(
+        weeksMatch.group(0)!,
+        totalWeeks: totalWeeks,
+      );
+      if (weeks.isEmpty) {
+        continue;
+      }
+      final int windowStart = i == 0 ? 0 : weeksMatch.end;
+      final int windowEnd = i + 1 < weeksMatches.length
+          ? weeksMatches[i + 1].start
+          : normalized.length;
+      RegExpMatch? paired;
+      for (final RegExpMatch candidate in periodMatches) {
+        if (claimed.contains(candidate)) {
+          continue;
+        }
+        if (candidate.start >= windowStart && candidate.start < windowEnd) {
+          paired = candidate;
+          break;
+        }
+      }
+      if (paired != null) {
+        claimed.add(paired);
+      }
+      final (int, int)? scrapedPeriods = paired == null
+          ? null
+          : parsePeriods(
+              paired.group(0)!.replaceAll(RegExp(r'[\[\]【】()（）节]'), ''),
+            );
+      final int startPeriod = scrapedPeriods?.$1 ?? period;
+      final int endPeriod = scrapedPeriods?.$2 ?? period + span - 1;
+      sessions.add(
+        CourseSession(
+          name: name,
+          weekday: weekday,
+          startPeriod: startPeriod,
+          endPeriod: endPeriod < startPeriod ? startPeriod : endPeriod,
+          weeks: weeks,
+          teacher: _stripTeacherTitle(labeledTeacher ?? teacher),
+          location: labeledLocation ?? location,
+        ),
+      );
+    }
+    if (sessions.isEmpty) {
+      // 周次段都解析不出结果时兜底成整学期都上，与旧行为一致。
+      return <CourseSession>[
+        CourseSession(
+          name: name,
+          weekday: weekday,
+          startPeriod: period,
+          endPeriod: period + span - 1,
+          weeks: _allWeeks(),
+          teacher: _stripTeacherTitle(labeledTeacher ?? teacher),
+          location: labeledLocation ?? location,
+        ),
+      ];
+    }
+    return _mergeSameSlotSessions(sessions);
   }
+
+  /// 同一格子里拆出来的多条：星期、节次、教师、教室都相同时只合并周次（取并集），
+  /// 「2-5周 + 6-9周 + 10-13周」合并成连续的 2-13 周，有断档的仍保留断档。
+  static List<CourseSession> _mergeSameSlotSessions(
+    List<CourseSession> sessions,
+  ) {
+    final List<CourseSession> merged = <CourseSession>[];
+    final Map<String, int> indexOf = <String, int>{};
+    for (final CourseSession session in sessions) {
+      final String key =
+          '${session.name}|${session.weekday}|${session.startPeriod}|'
+          '${session.endPeriod}|${session.teacher}|${session.location}';
+      final int? index = indexOf[key];
+      if (index == null) {
+        indexOf[key] = merged.length;
+        merged.add(session);
+        continue;
+      }
+      final CourseSession target = merged[index];
+      merged[index] = target.copyWith(
+        weeks: <int>{...target.weeks, ...session.weeks}.toList()..sort(),
+      );
+    }
+    return merged;
+  }
+
+  // 整格只取 _weeksToken / _periodToken 的第一个匹配，强智系统把同一门课
+  // 按周次段拆在同一格里时（如「2-5周」「6-9周」「10-13周」），后面的周次段
+  // 会整体丢失——导入后只剩前几周。
+  // CourseSession? parseScrapedItem(Map<String, dynamic> item) {
+  //   final int? weekday = (item['weekday'] as num?)?.toInt();
+  //   final int? period = (item['period'] as num?)?.toInt();
+  //   if (weekday == null || weekday < 1 || weekday > 7) {
+  //     return null;
+  //   }
+  //   if (period == null || period < 1) {
+  //     return null;
+  //   }
+  //   final int span = ((item['span'] as num?)?.toInt() ?? 1).clamp(1, 20);
+  //   final String raw = item['text']?.toString() ?? '';
+  //   // 课表下面的备注行放的是没排时间的课，不该出现在课表格子里。
+  //   if (RegExp(r'^\s*(备注|说明|注)\s*[:：]').hasMatch(raw)) {
+  //     return null;
+  //   }
+
+  //   final String normalized = _normalizeWeekMarkers(raw);
+  //   final RegExpMatch? weeksMatch = _weeksToken.firstMatch(normalized);
+  //   final List<int> weeks = weeksMatch == null
+  //       ? const <int>[]
+  //       : parseWeeks(weeksMatch.group(0)!, totalWeeks: totalWeeks);
+  //   final String withoutWeeks = weeksMatch == null
+  //       ? normalized
+  //       : normalized.replaceRange(weeksMatch.start, weeksMatch.end, ' ');
+
+  //   final RegExpMatch? periodMatch = _periodToken.firstMatch(withoutWeeks);
+
+  //   if (weeksMatch == null && periodMatch == null) {
+  //     return null;
+  //   }
+  //   final (int, int)? scrapedPeriods = periodMatch == null
+  //       ? null
+  //       : parsePeriods(
+  //           periodMatch.group(0)!.replaceAll(
+  //             RegExp(r'[\[\]【】()（）节]'),
+  //             '',
+  //           ),
+  //         );
+  //   final String body = periodMatch == null
+  //       ? withoutWeeks
+  //       : withoutWeeks.replaceRange(periodMatch.start, periodMatch.end, ' ');
+
+  //   List<String> segments = body
+  //       .split(RegExp(r'[\r\n]+|<br\s*/?>', caseSensitive: false))
+  //       .map(cleanText)
+  //       .where((String segment) => segment.isNotEmpty)
+  //       .toList();
+  //   if (segments.length == 1 &&
+  //       RegExp(r'\s').allMatches(segments.first).length >= 2) {
+  //     segments = segments.first
+  //         .split(RegExp(r'\s+'))
+  //         .map(cleanText)
+  //         .where((String segment) => segment.isNotEmpty)
+  //         .toList();
+  //   }
+  //   if (segments.isEmpty) {
+  //     return null;
+  //   }
+
+  //   final List<(String, String)> parts = _labeledParts(item['parts']);
+  //   String? labeledTeacher;
+  //   String? labeledLocation;
+  //   for (final (String, String) part in parts) {
+  //     final String key = part.$1;
+  //     final String value = part.$2;
+  //     if (value.length > 40) {
+  //       continue;
+  //     }
+  //     if (key.contains('老师') ||
+  //         key.contains('教师') ||
+  //         key.contains('授课')) {
+  //       if (!_looksLikeTeacherTitle(value)) {
+  //         labeledTeacher ??= value;
+  //       }
+  //     } else if (key.contains('教室') ||
+  //         key.contains('地点') ||
+  //         key.contains('场地')) {
+  //       labeledLocation ??= value;
+  //     }
+  //   }
+
+  //   String teacher = '';
+  //   String location = '';
+  //   String teacherTitle = '';
+  //   for (final String segment in segments.skip(1)) {
+  //     if (_looksLikeLocation(segment)) {
+  //       location = location.isEmpty ? segment : location;
+  //     } else if (_looksLikeTeacherTitle(segment)) {
+  //       teacherTitle = teacherTitle.isEmpty ? segment : teacherTitle;
+  //     } else if (teacher.isEmpty) {
+  //       teacher = segment;
+  //     }
+  //   }
+  //   if (teacher.isEmpty) {
+  //     teacher = teacherTitle;
+  //   }
+
+  //   final String fromSegments = _cleanCourseName(segments.first);
+  //   final String fromLabeled = _cleanCourseName(
+  //     cleanText(item['name']?.toString() ?? ''),
+  //   );
+  //   final String name;
+  //   if (fromLabeled.isEmpty) {
+  //     name = fromSegments;
+  //   } else if (fromSegments.isEmpty) {
+  //     name = fromLabeled;
+  //   } else {
+  //     name = fromLabeled.length <= fromSegments.length
+  //         ? fromLabeled
+  //         : fromSegments;
+  //   }
+  //   final int startPeriod = scrapedPeriods?.$1 ?? period;
+  //   final int endPeriod = scrapedPeriods?.$2 ?? period + span - 1;
+  //   return CourseSession(
+  //     name: name,
+  //     weekday: weekday,
+  //     startPeriod: startPeriod,
+  //     endPeriod: endPeriod < startPeriod ? startPeriod : endPeriod,
+  //     weeks: weeks.isEmpty ? _allWeeks() : weeks,
+  //     teacher: _stripTeacherTitle(labeledTeacher ?? teacher),
+  //     location: labeledLocation ?? location,
+  //   );
+  // }
 
   static String cleanCourseName(String value) => _cleanCourseName(value);
 
@@ -274,6 +488,7 @@ class JwxtCourseParser {
     }
     return _normalizeName(_collapseRepeats(cleanText(name)));
   }
+
   static String _collapseRepeats(String value) {
     final List<String> parts = value
         .split(RegExp(r'\s+'))
@@ -337,25 +552,23 @@ class JwxtCourseParser {
     return parts;
   }
 
-
   static String _normalizeWeekMarkers(String value) {
     return value
         .replaceAllMapped(
           RegExp(r'[（(]\s*([单双])\s*周?\s*[）)]'),
           (Match match) => '(${match.group(1)}周)',
         )
-        .replaceAll(RegExp(r'[（(]\s*周\s*[）)]'), '周');
+        // 强智的周次还会写成「2-5([周])」，括号里的方括号一起剥掉。
+        .replaceAll(RegExp(r'[（(]\s*[\[【]?\s*周\s*[\]】]?\s*[）)]'), '周');
   }
 
   static bool _looksLikeLocation(String value) =>
       RegExp(r'\d|[楼室馆场]|机房|教室|校区|操场|体育馆').hasMatch(value);
 
-
   static bool _looksLikeTeacherTitle(String value) => RegExp(
     r'^(高等学校|高等|高级|副|助理|外聘|兼职|专职)?'
     r'(教授|讲师|助教|教师|工程师|实验师|研究员|教员)$',
   ).hasMatch(cleanText(value));
-
 
   static String _normalizeName(String value) {
     String name = cleanText(value.replaceAll(RegExp(r'[（(]\s*[）)]'), ' '));
@@ -399,7 +612,6 @@ class JwxtCourseParser {
   }
 
   static const int maxPeriodsPerDay = 30;
-
 
   /// maxPeriodsPerDay时返回 null。
   static (int, int)? parsePeriods(String text) {
