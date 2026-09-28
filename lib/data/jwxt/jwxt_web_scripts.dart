@@ -132,6 +132,19 @@ abstract final class JwxtWebScripts {
     walk(root, 0);
     return documents;
   };
+  // \u5f3a\u667a\u7684\u8bfe\u8868\u683c\u5b50\u91cc\u85cf\u7740\u4e00\u4efd display:none \u7684\u540c\u95e8\u8bfe\u526f\u672c\uff08\u5b57\u6bb5\u66f4\u5c11\u3001\u6ca1\u6709\u8282\u6b21\uff09\uff0c
+  // \u62fc\u6587\u672c\u65f6\u8981\u8df3\u8fc7\u4e0d\u53ef\u89c1\u7684\u5143\u7d20\uff0c\u5426\u5219\u540c\u4e00\u95e8\u8bfe\u4f1a\u88ab\u8bfb\u6210\u4e24\u6761\u3002
+  // offsetParent \u4e3a\u7a7a\u53ea\u8bf4\u660e"\u53ef\u80fd\u4e0d\u53ef\u89c1"\uff08fixed \u5b9a\u4f4d\u4e5f\u4e3a\u7a7a\uff09\uff0c
+  // \u518d\u7528 computed display \u786e\u8ba4\u4e00\u6b21\uff0c\u8fd9\u6837\u7528 class \u9690\u85cf\u7684\u4e5f\u80fd\u8ba4\u51fa\u6765\u3002
+  var isHiddenEl = function (el) {
+    if (!el || el.offsetParent !== null) { return false; }
+    try {
+      var style = window.getComputedStyle ? window.getComputedStyle(el) : null;
+      return !!(style && style.display === 'none');
+    } catch (e) {
+      return false;
+    }
+  };
   var rawTextOf = function (node) {
     var children = (node && node.childNodes) ? node.childNodes : null;
     if (!children || !children.length) {
@@ -149,6 +162,7 @@ abstract final class JwxtWebScripts {
           continue;
         }
         if (tag === 'script' || tag === 'style') { continue; }
+        if (isHiddenEl(child)) { continue; }
         if (out && out.charAt(out.length - 1) !== '\n') { out += '\n'; }
         out += rawTextOf(child);
         out += '\n';
@@ -157,6 +171,7 @@ abstract final class JwxtWebScripts {
     return out;
   };
   var textOf = function (cell) {
+    if (isHiddenEl(cell)) { return ''; }
     var raw = rawTextOf(cell);
     return raw.replace(/\u00a0/g, ' ')
       .replace(/[ \t]+/g, ' ')
