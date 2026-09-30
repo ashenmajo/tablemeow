@@ -152,7 +152,7 @@ class _ImportPageState extends State<ImportPage> {
   }
 
   static const String _semesterStartHint =
-      '课表日期按本机学期设置推算，请到「设置」把第 1 周周一改成开学第一周的周一';
+      '请到「设置」把第 1 周周一改成开学第一周的周一';
 
   static bool _semesterStartLooksDefault(AppState state) {
     final DateTime thisMonday = Semester.mondayOf(state.now);
@@ -180,11 +180,19 @@ class _ImportPageState extends State<ImportPage> {
         duration: warning.isEmpty
             ? const Duration(seconds: 4)
             : const Duration(seconds: 6),
-        content: Text('已导入 $courseCount门课'),
+        content: Text(importResultMessage(courseCount, warning)),
       ),
     );
     state.openTab(AppTab.timetable);
   }
+}
+
+@visibleForTesting
+String importResultMessage(int courseCount, String warning) {
+  if (warning.isEmpty) {
+    return '已导入 $courseCount门课';
+  }
+  return '已导入 $courseCount门课\n$warning';
 }
 
 class _MessageBanner extends StatelessWidget {

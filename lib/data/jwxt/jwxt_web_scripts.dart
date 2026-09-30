@@ -407,43 +407,107 @@ abstract final class JwxtWebScripts {
     return {status: 'ok', source: 'document', courses: courses};
   };
 
-  var weekFilterOf = function (documents) {
+  // 只有形如「第 1 周」「1 周」「全部」的选项才算周次选项。
+  // 用文字判断而不是数字判断：教务系统里还有「当前周 / 日期」这种选择器，
+  // 它的值是 2026-09-28 这类日期、选中项文字里也带个「周」字（如「第四周」），
+  // 早先的 /^\d+$/ 与 indexOf('周') 两条判断会把它误当成周次下拉。
+  var weekOptionRe = /第?\s*\d+\s*周|全\s*部|所\s*有/;
+  var weekLabelRe = /^(第?\d+周|周次|全部|所有)$/;
+  var isWeekOption = function (option) {
+    return weekOptionRe.test(String(option.text || '').replace(/\s/g, ''));
+  };
+  // 下拉框附近有没有「周次」这个字样：select 自己或上两级祖先的文字里找。
+  var nearWeekLabel = function (el) {
+    var node = el;
+    for (var up = 0; up < 3 && node; up++) {
+      var text = (node.textContent || '').replace(/\s/g, '').slice(0, 60);
+      if (weekLabelRe.test(text)) { return true; }
+      node = node.parentNode;
+    }
+    return false;
+  };
+  // 返回这个下拉框里「全部」选项的值，没有则返回 null。
+  var allOptionValue = function (el) {
+    for (var o = 0; o < el.options.length; o++) {
+      var text = String(el.options[o].text || '').replace(/\s/g, '');
+      if (text.indexOf('全部') >= 0 || text.indexOf('所有') >= 0) {
+        return String(el.options[o].value);
+      }
+    }
+    return null;
+  };
+  // 第一遍：严格的周次下拉（选项文字像「第 N 周 / 全部」，或有「周次」标签）。
+  var strictWeekSelect = function (documents) {
     for (var d = 0; d < documents.length; d++) {
       var selects = documents[d].querySelectorAll('select');
       for (var i = 0; i < selects.length; i++) {
         var el = selects[i];
         if (!el.options || el.options.length < 2) { continue; }
-        var allValue = null;
         var weekLike = 0;
-        var otherLike = 0;
         for (var o = 0; o < el.options.length; o++) {
-          var option = el.options[o];
-          var text = (option.text || '').replace(/\s/g, '');
-          var value = String(option.value);
-          if (value === '0' || text.indexOf('全部') >= 0 || text.indexOf('所有') >= 0) {
-            if (allValue === null) { allValue = value; }
-          } else if (/^\d+$/.test(value) || text.indexOf('周') >= 0) {
-            weekLike++;
-          } else {
-            otherLike++;
-          }
+          if (isWeekOption(el.options[o])) { weekLike++; }
         }
-        if (weekLike < 2 || otherLike > weekLike) { continue; }
-        var selected = el.options[el.selectedIndex];
-        var label = selected
-          ? String(selected.text).replace(/\s/g, '')
-          : ('第 ' + String(el.value) + ' 周');
-        if (allValue !== null && String(el.value) === allValue) { return null; }
-        if (allValue === null || !el.form) {
-          return {
-            warning: '页面当前只显示了' + label +
-              '，请在课表页面把「周次」切到「全部」后重新读取，否则未开课周次的课程会缺失'
-          };
+        if (weekLike >= 2 || (weekLike >= 1 && nearWeekLabel(el))) {
+          return el;
         }
-        return weekRequestOf(el, allValue, label);
       }
     }
     return null;
+  };
+  // 第二遍（兜底）：值都是纯数字、且没有日期值的下拉框，才可能是周次。
+  // 日期值是「当前周 / 日期」选择器的特征，见到就直接排除。
+  var numericWeekSelect = function (documents) {
+    for (var d = 0; d < documents.length; d++) {
+      var selects = documents[d].querySelectorAll('select');
+      for (var i = 0; i < selects.length; i++) {
+        var el = selects[i];
+        if (!el.options || el.options.length < 2) { continue; }
+        var weekLike = 0;
+        var otherLike = 0;
+        var sawDate = false;
+        for (var o = 0; o < el.options.length; o++) {
+          var value = String(el.options[o].value);
+          if (/^\d{4}-\d{1,2}-\d{1,2}/.test(value)) { sawDate = true; break; }
+          if (/^\d+$/.test(value)) { weekLike++; } else { otherLike++; }
+        }
+        if (sawDate || weekLike < 2 || otherLike > weekLike) { continue; }
+        return el;
+      }
+    }
+    return null;
+  };
+  var labelOf = function (el) {
+    var selected = el && el.options ? el.options[el.selectedIndex] : null;
+    return selected ? String(selected.text).replace(/\s/g, '') : '某一周';
+  };
+  var probeOf = function (el) {
+    var selected = el && el.options ? el.options[el.selectedIndex] : null;
+    return '.v=' + String(el.value) +
+      '.n=' + String(el.options.length) +
+      '.s=' + (selected ? String(selected.text).replace(/\s/g, '').slice(0, 6) : '-');
+  };
+  var incompleteWarning = function (el) {
+    try {
+      if (window.console && window.console.warn) {
+        window.console.warn('[TableMeow] 未找到周次下拉，按当前页面数据返回' +
+          (el ? '：' + probeOf(el) : ''));
+      }
+    } catch (e) { /* 控制台不可用就算了 */ }
+    return '';
+  };
+  var weekFilterOf = function (documents) {
+    var el = strictWeekSelect(documents) || numericWeekSelect(documents);
+    if (!el) {
+      return { warning: incompleteWarning(null) };
+    }
+    var allValue = allOptionValue(el);
+    // 已经选在「全部」上，当前页面就是全量。
+    if (allValue !== null && String(el.value) === allValue) { return null; }
+    if (allValue === null || !el.form) {
+      return { warning: incompleteWarning(el) };
+    }
+    var label = labelOf(el);
+    return { label: label, request: weekRequestOf(el, allValue, label) };
   };
   var weekRequestOf = function (select, allValue, label) {
     var form = select.form;
@@ -489,8 +553,9 @@ abstract final class JwxtWebScripts {
         post(current);
         return;
       }
-      var fallbackWarning =
-        '页面当前只显示了' + info.label + '，未能读到全部周次，未开课周次的课程可能缺失';
+      // 提示里带上失败原因：用户能知道发生了什么，排障时也不用猜是哪条分支。
+      var head = '页面当前只显示了' + info.label + '，自动重读全部周次';
+      var fallbackWarning = head + '超时（9 秒未返回），这份数据可能缺未开课周次的课程';
       var xhr = new XMLHttpRequest();
       xhr.open(info.request.method, info.request.url, true);
       if (info.request.method === 'POST') {
@@ -518,11 +583,14 @@ abstract final class JwxtWebScripts {
           full = null;
         }
         var merged = betterOf(current, full);
-        settle(merged, merged === full ? '' : fallbackWarning);
+        // 请求成功就说明「全部」周次这一份已经拿到了，不管它是不是比当前页面更多
+        // （课程数与当前页面相同是完全正常的），都不该再提示「未能读到全部周次」。
+        // warning 只留给真正没拿到的情况：超时与请求出错。
+        settle(merged, '');
       };
       xhr.onerror = function () {
         window.clearTimeout(timer);
-        settle(current, fallbackWarning);
+        settle(current, head + '失败（请求出错），这份数据可能缺未开课周次的课程');
       };
       xhr.send(info.request.method === 'POST' ? info.request.body : null);
     } catch (e) {

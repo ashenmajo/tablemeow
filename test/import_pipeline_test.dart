@@ -2,12 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tablemeow/data/jwxt/jwxt_course_parser.dart';
 import 'package:tablemeow/data/timetable_storage.dart';
 import 'package:tablemeow/models/course_session.dart';
+import 'package:tablemeow/pages/import_page.dart';
 import 'package:tablemeow/models/timetable_style.dart';
 import 'package:tablemeow/state/app_state.dart';
 
-/// 端到端导入管道回归：模拟 WebView 从教务系统抓回的课程条目
-/// （按湖南人文科技学院「学期理论课表」真实结构还原），
-/// 走 解析 → importSessions 入库 → 重新加载 的完整链路。
 void main() {
   test('整表抓取结果解析出 8 条课程，多段周次不丢失', () {
     final List<CourseSession> sessions = const JwxtCourseParser()
@@ -110,6 +108,17 @@ void main() {
     );
     await reloaded.load();
     expect(reloaded.style, tuned, reason: '外观设置必须落盘');
+  });
+
+  test('导入结果提示条必须带上 warning 文案', () {
+    // 没有提醒时就是一句普通的成功提示。
+    expect(importResultMessage(8, ''), '已导入 8门课');
+
+    // 有提醒时必须显示出来，而不是只让提示条多停两秒。
+    const String hint = '课表日期按本机学期设置推算，请到「设置」把第 1 周周一改成开学第一周的周一';
+    final String message = importResultMessage(8, hint);
+    expect(message, contains('已导入 8门课'));
+    expect(message, contains(hint), reason: 'warning 文案不能被丢掉');
   });
 }
 
