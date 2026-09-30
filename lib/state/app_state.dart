@@ -71,8 +71,10 @@ class AppState extends ChangeNotifier {
     List<CourseSession> sessions, {
     Semester? semester,
   }) async {
+    // 用 copyWith 而不是重建 Timetable：重建会把 style 落回默认值，
+    // 用户调好的字号 / 列宽 / 配色 / 单课颜色与别名会在每次导入后丢失。
     _applyTimetable(
-      Timetable(
+      _timetable.copyWith(
         semester: semester ?? _timetable.semester,
         sessions: List<CourseSession>.unmodifiable(sessions),
       ),
@@ -84,8 +86,9 @@ class AppState extends ChangeNotifier {
 
 
   Future<void> updateSemester(Semester semester) async {
+    // 同上：不要重建 Timetable，否则会重置 style。
     _applyTimetable(
-      Timetable(semester: semester, sessions: _timetable.sessions),
+      _timetable.copyWith(semester: semester),
       keepSelectedWeek: true,
     );
     await _persist();
@@ -105,8 +108,9 @@ class AppState extends ChangeNotifier {
       updateStyle(_timetable.style.withCourseAlias(courseName, alias));
 
   Future<void> clearSessions() async {
+    // 只清课表，学期与外观设置都留着。
     _applyTimetable(
-      Timetable(semester: _timetable.semester),
+      _timetable.copyWith(sessions: const <CourseSession>[]),
       keepSelectedWeek: true,
     );
     await _persist();

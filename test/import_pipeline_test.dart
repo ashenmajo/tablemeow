@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tablemeow/data/jwxt/jwxt_course_parser.dart';
 import 'package:tablemeow/data/timetable_storage.dart';
 import 'package:tablemeow/models/course_session.dart';
+import 'package:tablemeow/models/timetable_style.dart';
 import 'package:tablemeow/state/app_state.dart';
 
 /// 端到端导入管道回归：模拟 WebView 从教务系统抓回的课程条目
@@ -59,6 +60,56 @@ void main() {
     expect(reloaded.sessions, hasLength(8));
     expect(reloaded.sessions.firstWhere((CourseSession s) => s.name.contains('信号') && s.weekday == 5).weeks,
         <int>[for (int w = 2; w <= 15; w++) w]);
+  });
+
+  test('外观设置不会被导入 / 改学期 / 清空课表重置', () async {
+    final List<CourseSession> sessions = const JwxtCourseParser()
+        .parseScrapedCourses(_scrapedCourses());
+    final _FakeStorage storage = _FakeStorage();
+    final AppState state = AppState(
+      storage: storage,
+      clock: () => DateTime(2026, 9, 28, 10, 30),
+    );
+    await state.load();
+
+    // 用户花时间调出来的外观：字号、列宽、配色、单课颜色与别名。
+    final TimetableStyle tuned = state.style.copyWith(
+      fontScale: 1.25,
+      dayWidth: 72,
+      palette: CoursePaletteKind.macaron,
+      courseColors: <String, int>{'信号与系统': 0xFFBBD3FF},
+      courseAliases: <String, String>{'信号与系统': '信号'},
+    );
+    await state.updateStyle(tuned);
+    expect(state.style, tuned, reason: '先确认设置确实存进去了');
+
+    // TimetableStyle 没有可读的 toString，失败时只打印 "Instance of ..."，
+    // 所以这里把差异点拼出来，测试挂了能一眼看出是哪个字段被重置了。
+    String diff(String step) => <String>[
+      '$step 后外观设置变了',
+      'fontScale: ${tuned.fontScale} -> ${state.style.fontScale}',
+      'dayWidth: ${tuned.dayWidth} -> ${state.style.dayWidth}',
+      'palette: ${tuned.palette.name} -> ${state.style.palette.name}',
+      'courseColors: ${tuned.courseColors} -> ${state.style.courseColors}',
+      'courseAliases: ${tuned.courseAliases} -> ${state.style.courseAliases}',
+    ].join('; ');
+
+    await state.importSessions(sessions);
+    expect(state.style, tuned, reason: diff('导入课表'));
+
+    await state.updateSemester(state.semester.copyWith(totalWeeks: 18));
+    expect(state.style, tuned, reason: diff('改学期'));
+
+    await state.clearSessions();
+    expect(state.style, tuned, reason: diff('清空课表'));
+
+    // 重启后从磁盘读回也必须是同一份设置。
+    final AppState reloaded = AppState(
+      storage: storage,
+      clock: () => DateTime(2026, 9, 28, 10, 30),
+    );
+    await reloaded.load();
+    expect(reloaded.style, tuned, reason: '外观设置必须落盘');
   });
 }
 
