@@ -28,3 +28,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    # 关于页的品牌图（白猫 + 一摞书，透明背景）
+    - assets/branding/logo.png

@@ -121,15 +121,12 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildAboutGroup(BuildContext context) {
-    return SectionCard(
-      child: _SettingsTile(
-        icon: Icons.info_outline,
-        title: '关于',
-        subtitle: '版本 1.0.0',
-        onTap: () => _open(context, const AboutPage()),
-      ),
+    return _SettingsTile(
+      icon: Icons.info_outline,
+      title: '关于',
+      subtitle: '版本 ${AboutPage.appVersion}',
+      onTap: () => _open(context, const AboutPage()),
     );
   }
 
