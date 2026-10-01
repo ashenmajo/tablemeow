@@ -137,7 +137,7 @@ class _TodayCourseCard extends StatelessWidget {
       style,
       theme.colorScheme,
     );
-    final _CourseStatus status = _statusOf(range, now);
+    final CourseStatus status = courseStatusOf(range, now);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -205,22 +205,66 @@ class _TodayCourseCard extends StatelessWidget {
       ),
     );
   }
-
-  static _CourseStatus _statusOf(PeriodTimeRange? range, DateTime now) {
-    if (range == null) {
-      return _CourseStatus.unknown;
-    }
-    if (now.isBefore(range.start)) {
-      return _CourseStatus.upcoming;
-    }
-    if (now.isAfter(range.end)) {
-      return _CourseStatus.finished;
-    }
-    return _CourseStatus.ongoing;
-  }
 }
 
-enum _CourseStatus { upcoming, ongoing, finished, unknown }
+enum CourseStatus { upcoming, ongoing, finished, unknown }
+
+CourseStatus courseStatusOf(PeriodTimeRange? range, DateTime now) {
+  if (range == null) {
+    return CourseStatus.unknown;
+  }
+  if (now.isBefore(range.start)) {
+    return CourseStatus.upcoming;
+  }
+  if (now.isAfter(range.end)) {
+    return CourseStatus.finished;
+  }
+  return CourseStatus.ongoing;
+}
+
+int _ceiledMinutes(Duration remaining) {
+  const int microsPerMinute = Duration.microsecondsPerMinute;
+  final int micros = remaining.inMicroseconds;
+  if (micros <= 0) {
+    return 0;
+  }
+  return (micros + microsPerMinute - 1) ~/ microsPerMinute;
+}
+
+String _durationText(int minutes) {
+  final int hours = minutes ~/ 60;
+  if (hours == 0) {
+    return '$minutes 分钟';
+  }
+  final int rest = minutes % 60;
+  if (rest == 0) {
+    return '$hours 小时';
+  }
+  return '$hours 小时 $rest 分钟';
+}
+
+String courseStatusLabel({
+  required CourseStatus status,
+  PeriodTimeRange? range,
+  required DateTime now,
+}) {
+  switch (status) {
+    case CourseStatus.ongoing:
+      final int minutes = range == null
+          ? 0
+          : _ceiledMinutes(range.end.difference(now));
+      return '进行中 · 还剩 ${_durationText(minutes)}';
+    case CourseStatus.upcoming:
+      final int minutes = range == null
+          ? 0
+          : _ceiledMinutes(range.start.difference(now));
+      return '${_durationText(minutes)}后';
+    case CourseStatus.finished:
+      return '已结束';
+    case CourseStatus.unknown:
+      return '待上课';
+  }
+}
 
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({
@@ -229,21 +273,25 @@ class _StatusBadge extends StatelessWidget {
     required this.now,
   });
 
-  final _CourseStatus status;
+  final CourseStatus status;
   final PeriodTimeRange? range;
   final DateTime now;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final String label = _label();
+    final String label = courseStatusLabel(
+      status: status,
+      range: range,
+      now: now,
+    );
     final Color background = switch (status) {
-      _CourseStatus.ongoing => theme.colorScheme.primary,
-      _CourseStatus.upcoming => theme.colorScheme.secondaryContainer,
-      _CourseStatus.finished => theme.colorScheme.surfaceContainerHighest,
-      _CourseStatus.unknown => theme.colorScheme.surfaceContainerHighest,
+      CourseStatus.ongoing => theme.colorScheme.primary,
+      CourseStatus.upcoming => theme.colorScheme.secondaryContainer,
+      CourseStatus.finished => theme.colorScheme.surfaceContainerHighest,
+      CourseStatus.unknown => theme.colorScheme.surfaceContainerHighest,
     };
-    final Color foreground = status == _CourseStatus.ongoing
+    final Color foreground = status == CourseStatus.ongoing
         ? theme.colorScheme.onPrimary
         : theme.colorScheme.onSurfaceVariant;
 
@@ -258,27 +306,5 @@ class _StatusBadge extends StatelessWidget {
         style: theme.textTheme.labelSmall?.copyWith(color: foreground),
       ),
     );
-  }
-
-  String _label() {
-    switch (status) {
-      case _CourseStatus.ongoing:
-        final int minutes = range == null
-            ? 0
-            : range!.end.difference(now).inMinutes;
-        return '进行中 · 还剩 $minutes分钟';
-      case _CourseStatus.upcoming:
-        final int minutes = range == null
-            ? 0
-            : range!.start.difference(now).inMinutes;
-        if (minutes < 60) {
-          return '$minutes分钟后';
-        }
-        return '${(minutes / 60).floor()} 小时后';
-      case _CourseStatus.finished:
-        return '已结束';
-      case _CourseStatus.unknown:
-        return '待上课';
-    }
   }
 }
