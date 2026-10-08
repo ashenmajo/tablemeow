@@ -179,7 +179,7 @@ class _TodayCourseCard extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       session.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith( 
                         fontWeight: FontWeight.w600,
                       ),
                     ),

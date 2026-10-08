@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../app_info.dart';
 import '../models/semester.dart';
 import '../models/timetable_style.dart';
 import '../state/app_scope.dart';
@@ -18,6 +19,7 @@ import 'settings/layout_settings_page.dart';
 import 'settings/period_settings_page.dart';
 import 'settings/semester_settings_page.dart';
 import 'settings/style_section_pages.dart';
+import 'settings/update_check_tile.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -122,11 +124,17 @@ class SettingsPage extends StatelessWidget {
     );
   }
   Widget _buildAboutGroup(BuildContext context) {
-    return _SettingsTile(
-      icon: Icons.info_outline,
-      title: '关于',
-      subtitle: '版本 ${AboutPage.appVersion}',
-      onTap: () => _open(context, const AboutPage()),
+    return Column(
+      children: <Widget>[
+        _SettingsTile(
+          icon: Icons.info_outline,
+          title: '关于',
+          subtitle: '版本 ${AppInfo.version}',
+          onTap: () => _open(context, const AboutPage()),
+        ),
+        // 检测更新放在设置页最下面，点一下就会去问更新接口。
+        const UpdateCheckTile(),
+      ],
     );
   }
 

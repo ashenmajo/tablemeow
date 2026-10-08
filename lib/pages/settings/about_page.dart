@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app_info.dart';
 import '../../theme/brand.dart';
 import '../../widgets/page_scaffold.dart';
 import '../../widgets/section_card.dart';
@@ -12,7 +13,7 @@ import 'data_settings_page.dart';
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
-  static const String appVersion = '1.0.0';
+  static const String appVersion = AppInfo.version;
 
   static const String _logoAsset = 'assets/branding/logo.png';
 
