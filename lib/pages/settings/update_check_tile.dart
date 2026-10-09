@@ -18,7 +18,7 @@ class UpdateCheckTile extends StatefulWidget {
     this.launcher,
   });
 
-  final AppUpdateSource? source;
+  final AppUpdateService? source;
 
   final String? currentVersion;
 
@@ -33,7 +33,7 @@ class _UpdateCheckTileState extends State<UpdateCheckTile> {
 
   String get _currentVersion => widget.currentVersion ?? AppInfo.version;
 
-  AppUpdateSource get _source => widget.source ?? HttpAppUpdateSource();
+  AppUpdateService get _source => widget.source ?? AppUpdateService();
 
   @override
   Widget build(BuildContext context) {

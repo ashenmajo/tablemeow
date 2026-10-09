@@ -1,6 +1,5 @@
-///app_update_service.dart
-///访问更新接口，把服务器返回的 JSON 变成 AppUpdateInfo
-library;
+// app_update_service.dart
+// 从服务器获取信息
 
 import 'dart:async';
 import 'dart:convert';
@@ -10,7 +9,7 @@ import 'package:http/http.dart' as http;
 import '../models/app_update_info.dart';
 
 class AppUpdateException implements Exception {
-  const AppUpdateException(this.message);
+  AppUpdateException(this.message);
 
   final String message;
 
@@ -18,64 +17,47 @@ class AppUpdateException implements Exception {
   String toString() => message;
 }
 
-abstract interface class AppUpdateSource {
-  Future<AppUpdateInfo> fetchLatest();
-}
-
-class HttpAppUpdateSource implements AppUpdateSource {
-  HttpAppUpdateSource({
-    http.Client? client,
-    Uri? endpoint,
-    this.timeout = const Duration(seconds: 12),
-  }) : _client = client ?? http.Client(),
-       endpoint = endpoint ?? defaultEndpoint;
-
-  static final Uri defaultEndpoint = Uri.parse('http://47.97.11.221/api/check');
+class AppUpdateService {
+  AppUpdateService({http.Client? client, Uri? endpoint})
+    : _client = client ?? http.Client(),
+      _endpoint = endpoint ?? Uri.parse('http://47.97.11.221/api/check');
 
   final http.Client _client;
+  final Uri _endpoint;
 
-  final Uri endpoint;
+  static const _timeout = Duration(seconds: 12);
 
-  final Duration timeout;
-
-  @override
   Future<AppUpdateInfo> fetchLatest() async {
-    return await _fetch(endpoint);
-  }
-
-  Future<AppUpdateInfo> _fetch(Uri endpoint) async {
-    final http.Response response;
+    http.Response resp;
     try {
-      response = await _client
-          .get(
-            endpoint,
-            headers: const <String, String>{'Accept': 'application/json'},
-          )
-          .timeout(timeout);
+      resp = await _client
+          .get(_endpoint, headers: {'Accept': 'application/json'})
+          .timeout(_timeout);
     } on TimeoutException {
-      throw const AppUpdateException('连接更新服务器超时，请检查网络后重试');
-    } catch (_) {
-      throw const AppUpdateException('无法连接更新服务器，请检查网络后重试');
+      throw AppUpdateException('连接超时，检查下网络');
+    } catch (e) {
+      throw AppUpdateException('连不上更新服务器：$e');
     }
 
-    if (response.statusCode != 200) {
-      throw AppUpdateException('更新服务器返回异常（HTTP ${response.statusCode}）');
+    if (resp.statusCode != 200) {
+      throw AppUpdateException('服务器返回 ${resp.statusCode}');
     }
 
-    Object? decoded;
+    dynamic data;
     try {
-      decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      data = jsonDecode(utf8.decode(resp.bodyBytes));
     } catch (_) {
-      throw const AppUpdateException('更新信息格式不正确，请联系开发者');
+      throw AppUpdateException('返回的不是合法 JSON');
     }
-    if (decoded is! Map) {
-      throw const AppUpdateException('更新信息格式不正确，请联系开发者');
+
+    if (data is! Map) {
+      throw AppUpdateException('返回结构不对，期望是对象');
     }
 
     try {
-      return AppUpdateInfo.fromJson(decoded.cast<String, dynamic>());
-    } on FormatException catch (error) {
-      throw AppUpdateException('更新信息不完整（${error.message}），请联系开发者');
+      return AppUpdateInfo.fromJson(Map<String, dynamic>.from(data));
+    } on FormatException catch (e) {
+      throw AppUpdateException('字段有问题：${e.message}');
     }
   }
 }
