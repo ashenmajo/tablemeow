@@ -1,7 +1,6 @@
-///style_section_pages.dart
-///该文件集成了三个页面：配色页、显示内容页、主题页
-///因为这三个页面的框架都是一样的，所以集成在一起了
-library;
+//style_section_pages.dart
+//该文件集成了三个页面：配色页、显示内容页、主题页
+//因为这三个页面的框架都是一样的，所以集成在一起了
 
 import 'package:flutter/material.dart';
 

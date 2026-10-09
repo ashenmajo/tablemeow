@@ -1,6 +1,5 @@
-///update_check_tile.dart
-///设置页最下面的「检测更新」入口：请求更新接口、弹窗展示结果、跳转下载页
-library;
+//update_check_tile.dart
+//设置页最下面的「检测更新」入口：请求更新接口、弹窗展示结果、跳转下载页
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';

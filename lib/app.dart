@@ -1,8 +1,8 @@
-///app.dart
-///该文件是主程序入口
-///主要的动作：
-///1.初始化课表存储 2.配置主题 3.按照我的使用习惯把切换界面的动画改为了Cupertino风格（从侧边进入退出）
-library;
+//app.dart
+//该文件是主程序入口
+//主要的动作：
+//1.初始化课表存储 2.配置主题 3.按照我的使用习惯把切换界面的动画改为了Cupertino风格（从侧边进入退出）
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

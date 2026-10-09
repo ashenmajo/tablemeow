@@ -1,6 +1,5 @@
-///timetable_data_show.dart
-///该文件是课表数据展示页,从data_setting_page.dart的“数据管理”选项进入
-library;
+//timetable_data_show.dart
+//该文件是课表数据展示页,从data_setting_page.dart的“数据管理”选项进入
 
 import 'package:flutter/material.dart';
 import 'package:tablemeow/models/course_session.dart';

@@ -1,6 +1,5 @@
-///import_page.dart
-///该文件是课表导入页
-library;
+//import_page.dart
+//该文件是课表导入页
 
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';

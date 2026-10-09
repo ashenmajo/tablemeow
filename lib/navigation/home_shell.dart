@@ -1,3 +1,5 @@
+//home-shell.dart
+//负责app的主框架，并处理定时任务
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -30,23 +32,20 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _state = AppScope.of(context);
-    // 每分钟刷新一次现在,驱动课表时间线与今日课程状态
+    // 每分钟刷一次，更新课表时间线和今日状态
     _minuteTicker ??= Timer.periodic(
       const Duration(minutes: 1),
-      (Timer _) => _state?.refresh(),
+      (_) => _state?.refresh(),
     );
   }
 
-  /// 从后台回到前台时时间可能已经过去很久，跳回本周并刷新
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state != AppLifecycleState.resumed) {
-      return;
-    }
-    _state
-      ?..goToCurrentWeek()
-      ..refresh();
+    if (state != AppLifecycleState.resumed) return;
+    // 从后台回来时间可能过了很久，跳回本周再刷新
+    _state?.goToCurrentWeek();
+    _state?.refresh();
   }
 
   @override
@@ -58,40 +57,32 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final AppState state = AppScope.of(context);
+    final state = AppScope.of(context);
+    final index = indexOfTab(state.selectedTab);
 
     return Scaffold(
       body: IndexedStack(
-        index: indexOfTab(state.selectedTab),
-        children: <Widget>[
-          for (final AppDestination destination in appDestinations)
-            _pageOf(destination.tab),
-        ],
+        index: index,
+        children: [for (final d in appDestinations) _pageOf(d.tab)],
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: indexOfTab(state.selectedTab),
-        onDestinationSelected: (int index) =>
-            state.openTab(appDestinations[index].tab),
-        destinations: <Widget>[
-          for (final AppDestination destination in appDestinations)
+        selectedIndex: index,
+        onDestinationSelected: (i) => state.openTab(appDestinations[i].tab),
+        destinations: [
+          for (final d in appDestinations)
             NavigationDestination(
-              icon: Icon(destination.icon),
-              selectedIcon: Icon(destination.selectedIcon),
-              label: destination.label,
+              icon: Icon(d.icon),
+              selectedIcon: Icon(d.selectedIcon),
+              label: d.label,
             ),
         ],
       ),
     );
   }
 
-  Widget _pageOf(AppTab tab) {
-    switch (tab) {
-      case AppTab.timetable:
-        return const TimetablePage();
-      case AppTab.today:
-        return const TodayPage();
-      case AppTab.settings:
-        return const SettingsPage();
-    }
-  }
+  Widget _pageOf(AppTab tab) => switch (tab) {
+    AppTab.timetable => const TimetablePage(),
+    AppTab.today => const TodayPage(),
+    AppTab.settings => const SettingsPage(),
+  };
 }

@@ -1,7 +1,5 @@
-/// app_destination.dart
-/// 该文件是底部导航栏的数据配置文件
-/// by ashenmajo
-library;
+// app_destination.dart
+// 该文件是底部导航栏的数据配置文件
 
 import 'package:flutter/material.dart';
 
@@ -22,7 +20,7 @@ class AppDestination {
   final IconData selectedIcon;
 }
 
-const List<AppDestination> appDestinations = <AppDestination>[
+const List<AppDestination> appDestinations = [
   AppDestination(
     tab: AppTab.timetable,
     label: '课表',
@@ -43,5 +41,4 @@ const List<AppDestination> appDestinations = <AppDestination>[
   ),
 ];
 
-int indexOfTab(AppTab tab) =>
-    appDestinations.indexWhere((AppDestination d) => d.tab == tab);
+int indexOfTab(AppTab tab) => appDestinations.indexWhere((d) => d.tab == tab);

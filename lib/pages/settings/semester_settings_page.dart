@@ -1,6 +1,5 @@
-///semester_setting_page.dart
-///该文件用于设置第一周周一在哪个日期，以及总的周数
-library;
+//semester_setting_page.dart
+//该文件用于设置第一周周一在哪个日期，以及总的周数
 
 import 'package:flutter/material.dart';
 

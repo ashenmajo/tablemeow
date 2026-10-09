@@ -1,7 +1,6 @@
-///layout_setting_page.dart
-///该文件是布局设置页
-///可以按照偏好修改课表UI
-library;
+//layout_setting_page.dart
+//该文件是布局设置页
+//可以按照偏好修改课表UI
 
 import 'package:flutter/material.dart';
 

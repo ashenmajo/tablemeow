@@ -1,6 +1,5 @@
-///today_page.dart
-///该文件是今日页
-library;
+//today_page.dart
+//该文件是今日页
 
 import 'package:flutter/material.dart';
 

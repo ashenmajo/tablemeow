@@ -1,7 +1,6 @@
-///settings_page.dart
-///该文件是所有设置和信息的入口页
-///包含了：布局与尺寸、配色、显示内容、节次时间、学期设置、主题、数据管理、关于
-library;
+//settings_page.dart
+//该文件是所有设置和信息的入口页
+//包含了：布局与尺寸、配色、显示内容、节次时间、学期设置、主题、数据管理、关于
 
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,5 @@
-///timetable_page.dart
-///该文件是课表页
-library;
+//timetable_page.dart
+//该文件是课表页
 
 import 'dart:math' as math;
 

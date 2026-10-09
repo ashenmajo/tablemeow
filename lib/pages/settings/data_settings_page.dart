@@ -1,7 +1,6 @@
-///data_setting_page.dart
-///该文件是数据管理页
-///可以删除课表数据和导入课表产生的网页数据
-library;
+//data_setting_page.dart
+//该文件是数据管理页
+//可以删除课表数据和导入课表产生的网页数据
 
 import 'dart:convert';
 

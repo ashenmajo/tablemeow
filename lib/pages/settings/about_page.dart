@@ -1,6 +1,5 @@
-///about.dart
-///该文件是关于页：应用的封面、技术信息、隐私说明与开源许可
-library;
+//about.dart
+//该文件是关于页：应用的封面、技术信息、隐私说明与开源许可
 
 import 'package:flutter/material.dart';
 

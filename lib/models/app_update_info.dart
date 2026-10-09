@@ -1,6 +1,5 @@
-///app_update_info.dart
-///服务器返回的更新信息：最新版本号、下载地址与更新说明
-library;
+//app_update_info.dart
+//服务器返回的更新信息：最新版本号、下载地址与更新说明
 
 import 'package:flutter/foundation.dart';
 

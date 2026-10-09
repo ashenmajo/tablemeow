@@ -1,7 +1,6 @@
-///period_setting_page.dart
-///该文件是节次时间设置页
-///提供了自动分配时间，测试的时候发现有些课间、课长没有统一的导致后面的时间分配出错，所以提供了手动修改时间
-library;
+//period_setting_page.dart
+//该文件是节次时间设置页
+//提供了自动分配时间，测试的时候发现有些课间、课长没有统一的导致后面的时间分配出错，所以提供了手动修改时间
 
 import 'package:flutter/material.dart';
 

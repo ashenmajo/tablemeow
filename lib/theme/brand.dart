@@ -1,6 +1,5 @@
-///brand.dart
-///该文件放品牌固定色：这些颜色不随主题明暗变化。
-library;
+//brand.dart
+//该文件放品牌固定色：这些颜色不随主题明暗变化。
 
 import 'package:flutter/material.dart';
 
