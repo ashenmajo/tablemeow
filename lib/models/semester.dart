@@ -9,24 +9,14 @@ class Semester {
     this.totalWeeks = 20,
     this.periods = defaultPeriods,
   });
+
   final DateTime startDate;
-
   final int totalWeeks;
-
   final List<PeriodTime> periods;
 
-  static const List<String> weekdayNames = <String>[
-    '周一',
-    '周二',
-    '周三',
-    '周四',
-    '周五',
-    '周六',
-    '周日',
-  ];
+  static const weekdayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
-
-  static const List<PeriodTime> defaultPeriods = <PeriodTime>[
+  static const defaultPeriods = [
     PeriodTime(index: 1, start: '08:00', end: '08:45'),
     PeriodTime(index: 2, start: '08:55', end: '09:40'),
     PeriodTime(index: 3, start: '10:00', end: '10:45'),
@@ -49,23 +39,21 @@ class Semester {
     required int lessonMinutes,
     required int breakMinutes,
   }) {
-    final int lesson = lessonMinutes.clamp(10, 180);
-    final int rest = breakMinutes.clamp(0, 60);
-    final Map<PeriodSession, int> starts = <PeriodSession, int>{
+    final lesson = lessonMinutes.clamp(10, 180);
+    final rest = breakMinutes.clamp(0, 60);
+    var cursor = {
       PeriodSession.morning: morningStart,
       PeriodSession.afternoon: afternoonStart,
       PeriodSession.evening: eveningStart,
     };
 
-    final Map<PeriodSession, int> cursor = Map<PeriodSession, int>.of(starts);
-    final List<PeriodTime> result = <PeriodTime>[];
-    for (final PeriodTime period in periods) {
-      final PeriodSession session = period.session;
-      final int start = cursor[session] ?? starts[session]!;
-      cursor[session] = start + lesson + rest;
+    var result = <PeriodTime>[];
+    for (final p in periods) {
+      final start = cursor[p.session]!;
+      cursor[p.session] = start + lesson + rest;
       result.add(
         PeriodTime(
-          index: period.index,
+          index: p.index,
           start: PeriodTime.clockOf(start),
           end: PeriodTime.clockOf(start + lesson),
         ),
@@ -74,16 +62,15 @@ class Semester {
     return result;
   }
 
-  factory Semester.defaults({DateTime? today}) {
-    return Semester(startDate: mondayOf(today ?? DateTime.now()));
-  }
+  factory Semester.defaults({DateTime? today}) =>
+      Semester(startDate: mondayOf(today ?? DateTime.now()));
 
   static DateTime mondayOf(DateTime date) {
-    final DateTime day = DateTime(date.year, date.month, date.day);
+    final day = DateTime(date.year, date.month, date.day);
     return day.subtract(Duration(days: day.weekday - 1));
   }
 
-  String weekdayName(int weekday) => weekdayNames[(weekday - 1)];
+  String weekdayName(int weekday) => weekdayNames[weekday - 1];
 
   DateTime weekStart(int week) => startDate.add(Duration(days: (week - 1) * 7));
 
@@ -91,20 +78,18 @@ class Semester {
       weekStart(week).add(Duration(days: weekday - 1));
 
   int weekOfDate(DateTime date) {
-    final DateTime day = DateTime(date.year, date.month, date.day);
+    final day = DateTime(date.year, date.month, date.day);
     return day.difference(startDate).inDays ~/ 7 + 1;
   }
 
   bool containsDate(DateTime date) {
-    final int week = weekOfDate(date);
-    return week >= 1 && week <= totalWeeks;
+    final w = weekOfDate(date);
+    return w >= 1 && w <= totalWeeks;
   }
 
   PeriodTime? periodAt(int index) {
-    for (final PeriodTime period in periods) {
-      if (period.index == index) {
-        return period;
-      }
+    for (final p in periods) {
+      if (p.index == index) return p;
     }
     return null;
   }
@@ -113,46 +98,37 @@ class Semester {
     DateTime? startDate,
     int? totalWeeks,
     List<PeriodTime>? periods,
-  }) {
-    return Semester(
-      startDate: startDate ?? this.startDate,
-      totalWeeks: totalWeeks ?? this.totalWeeks,
-      periods: periods ?? this.periods,
-    );
-  }
+  }) => Semester(
+    startDate: startDate ?? this.startDate,
+    totalWeeks: totalWeeks ?? this.totalWeeks,
+    periods: periods ?? this.periods,
+  );
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  Map<String, dynamic> toJson() => {
     'startDate': startDate.toIso8601String(),
     'totalWeeks': totalWeeks,
-    'periods': <Map<String, dynamic>>[
-      for (final PeriodTime period in periods) period.toJson(),
-    ],
+    'periods': periods.map((p) => p.toJson()).toList(),
   };
 
   factory Semester.fromJson(Map<String, dynamic> json) {
-    final List<Object?> rawPeriods =
-        json['periods'] as List<Object?>? ?? const <Object?>[];
-    final List<PeriodTime> periods = <PeriodTime>[
-      for (final Object? item in rawPeriods)
-        if (item is Map<String, dynamic>)
-          PeriodTime.fromJson(item)
-        else if (item is Map)
-          PeriodTime.fromJson(item.cast<String, dynamic>()),
-    ];
+    final raw = (json['periods'] as List?) ?? [];
+    final list = raw
+        .whereType<Map>()
+        .map((m) => PeriodTime.fromJson(m.cast<String, dynamic>()))
+        .toList();
     return Semester(
       startDate: DateTime.parse(json['startDate'] as String),
       totalWeeks: (json['totalWeeks'] as num? ?? 20).toInt(),
-      periods: periods.isEmpty ? defaultPeriods : periods,
+      periods: list.isEmpty ? defaultPeriods : list,
     );
   }
 
   @override
-  bool operator ==(Object other) {
-    return other is Semester &&
-        other.startDate == startDate &&
-        other.totalWeeks == totalWeeks &&
-        listEquals(other.periods, periods);
-  }
+  bool operator ==(Object other) =>
+      other is Semester &&
+      other.startDate == startDate &&
+      other.totalWeeks == totalWeeks &&
+      listEquals(other.periods, periods);
 
   @override
   int get hashCode =>
